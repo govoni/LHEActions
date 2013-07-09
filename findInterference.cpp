@@ -92,10 +92,10 @@ lorentzVector buildLP (const LHEF::HEPEUP & event, int iPart)
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 
-void fillWWhist (LHEF::Reader & reader, TH1F * h_MWW)
+int fillWWhist (LHEF::Reader & reader, TH1F * h_MWW, double XS)
 {
-//      TLorentzVector Higgs;
-//      int iPartHiggs;
+  int totalCount = 0 ;
+   
   //PG loop over input events
   while (reader.readEvent ()) 
     {
@@ -145,16 +145,14 @@ void fillWWhist (LHEF::Reader & reader, TH1F * h_MWW)
       sort (v_f_quarks.rbegin (), v_f_quarks.rend (), ptsort ()) ;  
       TLorentzVector total = (v_f_leptons.at (0) + v_f_neutrinos.at (0)) + (v_f_quarks.at (2) + v_f_quarks.at (3)) ;
 
-      //PG reconstruct the final state invariant mass system
-      //PG assign the two jets      
-      cout << "leptons : " << v_f_leptons.size () << "\t" ;
-      cout << "quarks : "  << v_f_quarks.size () << "\t" ;
-      cout << "neutrinos : "  << v_f_neutrinos.size () << "\t" ;
-      cout << endl ;
-   
       h_MWW->Fill (total.M ()) ;
+      ++totalCount ;
     } //PG loop over input events
 
+  h_MWW->Scale (XS / totalCount) ;
+
+  return totalCount ;
+  
 }
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -162,18 +160,47 @@ void fillWWhist (LHEF::Reader & reader, TH1F * h_MWW)
 
 int main(int argc, char ** argv) 
 {
+  //PG ---- madgraph ---- signal only
+  
   string filename_mg = "/Users/govoni/data/lvjj_samples/interference/madgraph/madgraph_500GeV_4jlv.lhe" ;
   double XS_mg = 0.009129 ; // pb
   
   std::ifstream ifs_mg (filename_mg.c_str ()) ;
   LHEF::Reader reader_mg (ifs_mg) ;
-  TH1F * h_mWW_mg = new TH1F ("h_mWW_mg", "h_mWW_mg", 1000, 0, 3000) ;
-  fillWWhist (reader_mg, h_mWW_mg) ;
+  TH1F * h_MWW_mg = new TH1F ("h_MWW_mg", "h_MWW_mg", 1000, 0, 3000) ;
+  int entries_mg = fillWWhist (reader_mg, h_MWW_mg, XS_mg) ;
 
+  //PG ---- phantom ---- background only
 
-//  TFile f ("findInterference.root", "recreate") ;
-//  h_mWW.Write () ;
-//  f.Close () ;
+  string filename_phbkg = "/Users/govoni/data/lvjj_samples/interference/4jlv_h126/genh126/total.lhe" ;
+  double XS_phbkg = 0.07762748 ; // 7.76274847686845293E-002 // pb
+  
+  std::ifstream ifs_phbkg (filename_phbkg.c_str ()) ;
+  LHEF::Reader reader_phbkg (ifs_phbkg) ;
+  TH1F * h_MWW_phbkg = new TH1F ("h_MWW_phbkg", "h_MWW_phbkg", 1000, 0, 3000) ;
+  int entries_phbkg = fillWWhist (reader_phbkg, h_MWW_phbkg, XS_phbkg) ;
+
+  //PG ---- phantom ---- background and signal
+
+  string filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/4jlv/genh500/total.lhe" ;
+  double XS_phbkgsig = 0.078904216 ; // 7.890421624985394E-002 // pb
+  
+  std::ifstream ifs_phbkgsig (filename_phbkgsig.c_str ()) ;
+  LHEF::Reader reader_phbkgsig (ifs_phbkgsig) ;
+  TH1F * h_MWW_phbkgsig = new TH1F ("h_MWW_phbkgsig", "h_MWW_phbkgsig", 1000, 0, 3000) ;
+  int entries_phbkgsig = fillWWhist (reader_phbkgsig, h_MWW_phbkgsig, XS_phbkgsig) ;
+
+  //PG operations
+  
+  TH1F * h_subtr = (TH1F *) h_MWW_phbkgsig->Clone ("h_subtr") ;
+  h_subtr->Add (h_MWW_mg, -1) ;
+
+  TFile f ("findInterference.root", "recreate") ;
+  h_MWW_mg->Write () ;
+  h_MWW_phbkg->Write () ;
+  h_MWW_phbkgsig->Write () ;
+  h_subtr->Write () ;
+  f.Close () ;
 
   return 0 ;
 }
