@@ -160,6 +160,10 @@ int fillWWhist (LHEF::Reader & reader, TH1F * h_MWW, double XS)
 
 int main(int argc, char ** argv) 
 {
+  int nbins = 50 ;
+  float hmin = 200. ; 
+  float hmax = 2000. ;
+
   //PG ---- madgraph ---- signal only
   
   string filename_mg = "/Users/govoni/data/lvjj_samples/interference/madgraph/madgraph_500GeV_4jlv.lhe" ;
@@ -167,28 +171,35 @@ int main(int argc, char ** argv)
   
   std::ifstream ifs_mg (filename_mg.c_str ()) ;
   LHEF::Reader reader_mg (ifs_mg) ;
-  TH1F * h_MWW_mg = new TH1F ("h_MWW_mg", "h_MWW_mg", 1000, 0, 3000) ;
+  TH1F * h_MWW_mg = new TH1F ("h_MWW_mg", "h_MWW_mg", nbins, hmin, hmax) ;
   int entries_mg = fillWWhist (reader_mg, h_MWW_mg, XS_mg) ;
 
+  cout << "madgraph events : " << entries_mg << endl ;
+  
   //PG ---- phantom ---- background only
 
   string filename_phbkg = "/Users/govoni/data/lvjj_samples/interference/4jlv_h126/genh126/total.lhe" ;
-  double XS_phbkg = 0.07762748 ; // 7.76274847686845293E-002 // pb
+  double XS_phbkg = 0.07762748 * 4 ; // 7.76274847686845293E-002 // pb the factor 4 accounts for muons, electrons and sign exchanges
   
   std::ifstream ifs_phbkg (filename_phbkg.c_str ()) ;
   LHEF::Reader reader_phbkg (ifs_phbkg) ;
-  TH1F * h_MWW_phbkg = new TH1F ("h_MWW_phbkg", "h_MWW_phbkg", 1000, 0, 3000) ;
+  TH1F * h_MWW_phbkg = new TH1F ("h_MWW_phbkg", "h_MWW_phbkg", nbins, hmin, hmax) ;
   int entries_phbkg = fillWWhist (reader_phbkg, h_MWW_phbkg, XS_phbkg) ;
+
+  cout << "phantom bkg events : " << entries_phbkg << endl ;
 
   //PG ---- phantom ---- background and signal
 
   string filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/4jlv/genh500/total.lhe" ;
-  double XS_phbkgsig = 0.078904216 ; // 7.890421624985394E-002 // pb
+//  string filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/4jlv/genh800/total.lhe" ;
+  double XS_phbkgsig = 0.078904216 * 4 ; // 7.890421624985394E-002 // pb
   
   std::ifstream ifs_phbkgsig (filename_phbkgsig.c_str ()) ;
   LHEF::Reader reader_phbkgsig (ifs_phbkgsig) ;
-  TH1F * h_MWW_phbkgsig = new TH1F ("h_MWW_phbkgsig", "h_MWW_phbkgsig", 1000, 0, 3000) ;
+  TH1F * h_MWW_phbkgsig = new TH1F ("h_MWW_phbkgsig", "h_MWW_phbkgsig", nbins, hmin, hmax) ;
   int entries_phbkgsig = fillWWhist (reader_phbkgsig, h_MWW_phbkgsig, XS_phbkgsig) ;
+
+  cout << "phantom bkg+sig events : " << entries_phbkgsig << endl ;
 
   //PG operations
   
@@ -204,3 +215,42 @@ int main(int argc, char ** argv)
 
   return 0 ;
 }
+
+/*
+
+TCanvas c1
+c1.DrawFrame (100,0.00001,2000,0.07)
+h_MWW_phbkg->SetStats (0)
+h_MWW_phbkgsig->SetStats (0)
+h_MWW_mg->SetStats (0)
+h_MWW_phbkg->SetLineColor (kOrange)
+h_MWW_phbkg->SetLineWidth (2)
+h_MWW_phbkg->Draw ("same")
+h_MWW_phbkgsig->SetLineColor (kRed)
+h_MWW_phbkgsig->SetLineWidth (2)
+h_MWW_phbkgsig->Draw ("same")
+
+TH1F * diff = (TH1F *) h_MWW_phbkgsig->Clone ("diff")
+diff->SetTitle ("")
+diff->Add (h_MWW_phbkg, -1) 
+
+TH1F * ratio = (TH1F *) h_MWW_mg->Clone ("ratio") 
+ratio->SetTitle ("")
+ratio->Divide (diff)
+cout << "scaling by " << 1. / ratio->GetBinContent (ratio->FindBin (500)) << endl ;
+//h_MWW_mg->Scale (1. / ratio->GetBinContent (ratio->FindBin (500)))
+
+h_MWW_mg->Draw ("same")
+
+TCanvas c2
+diff->Draw ()
+
+TCanvas c3
+ratio->Draw ()
+
+TCanvas c4
+diff->Draw ()
+h_MWW_mg->Draw ("same")
+
+
+*/
