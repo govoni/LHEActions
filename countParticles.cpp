@@ -16,12 +16,16 @@ using namespace std ;
 
 int main(int argc, char ** argv) 
 {
-  if(argc < 2)
+  if (argc < 2)
     {
       cout << "Usage:   " << argv[0] 
            << " input.lhe" << endl ;
       return -1;
     }
+
+  bool printList = false ;
+  if (argc == 3) printList = true ;
+
 
   std::ifstream ifs (argv[1]) ;
   LHEF::Reader reader (ifs) ;
@@ -38,11 +42,17 @@ int main(int argc, char ** argv)
       // loop over particles in the event
       for (int iPart = 0 ; iPart < reader.hepeup.IDUP.size (); ++iPart) 
         {
-           if (reader.hepeup.ISTUP.at (iPart) ==  1) h_out.Fill (reader.hepeup.IDUP.at (iPart)) ;
+           if (reader.hepeup.ISTUP.at (iPart) ==  1) 
+             {
+               h_out.Fill (reader.hepeup.IDUP.at (iPart)) ;
+               if (printList) cout << reader.hepeup.IDUP.at (iPart) << "\t" ;
+             }
+
            if (reader.hepeup.ISTUP.at (iPart) ==  2) h_int.Fill (reader.hepeup.IDUP.at (iPart)) ;
            if (reader.hepeup.ISTUP.at (iPart) == -1) h_inp.Fill (reader.hepeup.IDUP.at (iPart)) ;
              
         } // loop over particles in the event
+      if (printList) cout << "\n" ;
 
     } //PG loop over input events
 
