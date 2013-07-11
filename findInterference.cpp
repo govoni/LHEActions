@@ -179,7 +179,7 @@ int main(int argc, char ** argv)
   //PG ---- phantom ---- background only
 
   string filename_phbkg = "/Users/govoni/data/lvjj_samples/interference/4jlv_h126/genh126/total.lhe" ;
-  double XS_phbkg = 0.07762748 * 4 ; // 7.76274847686845293E-002 // pb the factor 4 accounts for muons, electrons and sign exchanges
+  double XS_phbkg = 0.07762748 * 2 ; // 7.76274847686845293E-002 // pb the factor 2 accounts for muons, electrons
   
   std::ifstream ifs_phbkg (filename_phbkg.c_str ()) ;
   LHEF::Reader reader_phbkg (ifs_phbkg) ;
@@ -192,7 +192,7 @@ int main(int argc, char ** argv)
 
   string filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/4jlv/genh500/total.lhe" ;
 //  string filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/4jlv/genh800/total.lhe" ;
-  double XS_phbkgsig = 0.078904216 * 4 ; // 7.890421624985394E-002 // pb
+  double XS_phbkgsig = 0.078904216 * 2 ; // 7.890421624985394E-002 // pb
   
   std::ifstream ifs_phbkgsig (filename_phbkgsig.c_str ()) ;
   LHEF::Reader reader_phbkgsig (ifs_phbkgsig) ;
