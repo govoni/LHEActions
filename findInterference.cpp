@@ -253,7 +253,7 @@ fillHistos (LHEF::Reader & reader, histos & Histos, double XS, double referenceS
         weight = LHAPDF::xfx (x[0], referenceScale, flavour[0]) * LHAPDF::xfx (x[1], referenceScale, flavour[1]) /
                  (LHAPDF::xfx (x[0], scale, flavour[0]) * LHAPDF::xfx (x[1], scale, flavour[1])) ;
 
-      Histos.m_h_MWW->Fill (total.M ()) ;
+      Histos.m_h_MWW->Fill (total.M (), weight) ;
       totalCount += weight ;
 
     } //PG loop over input events
