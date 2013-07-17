@@ -253,6 +253,7 @@ fillHistos (LHEF::Reader & reader, histos & Histos, double XS, double referenceS
         weight = LHAPDF::xfx (x[0], referenceScale, flavour[0]) * LHAPDF::xfx (x[1], referenceScale, flavour[1]) /
                  (LHAPDF::xfx (x[0], scale, flavour[0]) * LHAPDF::xfx (x[1], scale, flavour[1])) ;
 
+      if (totalCount < 10) cout << "WEIGHT " << weight << endl ; //PG DEBUG
       Histos.m_h_MWW->Fill (total.M (), weight) ;
       totalCount += weight ;
 
@@ -360,8 +361,8 @@ TCanvas c3
 ratio->Draw ("hist")
 
 TCanvas c4
-diff->Draw ("hist")
-h_MWW_mg->Draw ("histsame")
+h_MWW_mg->Draw ("hist")
+diff->Draw ("histsame")
 
 
 */
