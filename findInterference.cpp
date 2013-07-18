@@ -65,6 +65,31 @@ pair<int, int> findPairWithLargestDeta (const vector<TLorentzVector> & v_f_quark
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 
+pair<int, int> findPairWithWMass (const vector<TLorentzVector> & v_f_quarks)
+{
+  double ref_deltaM = 100000. ;
+  int one = 0 ;
+  int two = 0 ;
+  
+  for (int iJ = 0 ; iJ < 4 ; ++iJ)
+    for (int iJ2 = iJ + 1 ; iJ2 < 4 ; ++iJ2)
+      {
+        double deltaM = fabs ((v_f_quarks.at (iJ) + v_f_quarks.at (iJ2)).M () - 80.4) ;
+        if (deltaM < ref_deltaM)
+          {
+            ref_deltaM = deltaM ;
+            one = iJ ;
+            two = iJ2 ;
+          }      
+      }
+  return pair<int, int> (one, two) ;
+  
+}
+
+
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+
 int splitString (vector<string>& fields, const string & work, char delim, int rep = 0) {
     if (!fields.empty ()) fields.clear () ;  // empty vector if necessary
     string buf = "" ;
@@ -132,7 +157,7 @@ struct histos
   histos (TString name, double XS) : m_name (name), m_XS (XS)
     {
       m_h_MWW = new TH1F (TString ("h_MWW_") + name, 
-                          TString ("h_MWW_") + name, 50, 200., 2000.) ;
+                          TString ("h_MWW_") + name, 200., 200., 2000.) ;
       m_h_MWW->Sumw2 () ;
       m_h_scale = new TH1F (TString ("h_scale_") + name, 
                           TString ("h_scale_") + name, 100, 0., 1000.) ;
@@ -195,8 +220,7 @@ fillHistos (LHEF::Reader & reader, histos & Histos, double XS, double referenceS
              {
                x[iPart] = dummy.P () / 4000. ;
                flavour[iPart] = reader.hepeup.IDUP.at (iPart) ;
-
-             } // incoming particle          
+             } // incoming particles         
 
           // intermediate particles          
           if (reader.hepeup.ISTUP.at (iPart) == 2)
@@ -205,7 +229,8 @@ fillHistos (LHEF::Reader & reader, histos & Histos, double XS, double referenceS
                 {
                   v_f_Ws.push_back (dummy) ;
                 }              
-            }
+            } // intermediate particles
+            
           // outgoing particles          
           if (reader.hepeup.ISTUP.at (iPart) == 1)
             {
@@ -227,7 +252,9 @@ fillHistos (LHEF::Reader & reader, histos & Histos, double XS, double referenceS
                v_f_neutrinos.push_back (dummy) ;        
              }
          } // outgoing particles
-        } // loop over particles in the event
+       } // loop over particles in the event
+
+//      if (totalCount < 10) cout << "PARTICLES " <<  v_f_leptons.size () << "\t" << v_f_neutrinos.size () << "\t" << v_f_quarks.size () << "\n" ;
 
       pair<int, int> detaIndices = findPairWithLargestDeta (v_f_quarks) ;
       if (v_f_quarks.at (detaIndices.second).Eta () - v_f_quarks.at (detaIndices.first).Eta () < 2) continue ;
@@ -242,7 +269,12 @@ fillHistos (LHEF::Reader & reader, histos & Histos, double XS, double referenceS
 
       //PG the first two are the VBF jets, the following ones the W jets
       sort (v_f_quarks.rbegin (), v_f_quarks.rend (), ptsort ()) ;  
-      TLorentzVector total = (v_f_leptons.at (0) + v_f_neutrinos.at (0)) + (v_f_quarks.at (2) + v_f_quarks.at (3)) ;
+      
+//      pair<int, int> Wpair (2, 3) ;
+      pair<int, int> Wpair = findPairWithWMass (v_f_quarks) ;
+      
+      TLorentzVector total = (v_f_leptons.at (0) + v_f_neutrinos.at (0)) + 
+                             (v_f_quarks.at (Wpair.first) + v_f_quarks.at (Wpair.second)) ;
 
       //PG the scale:
       float scale = reader.hepeup.SCALUP ;
@@ -331,7 +363,7 @@ int main (int argc, char ** argv)
 /*
 
 TCanvas c1
-c1.DrawFrame (100,0.00001,2000,0.07)
+c1.DrawFrame (100,0.00001,2000,0.01)
 h_MWW_phbkg->SetStats (0)
 h_MWW_phbkgsig->SetStats (0)
 h_MWW_mg->SetStats (0)
@@ -353,16 +385,26 @@ cout << "scaling by " << 1. / ratio->GetBinContent (ratio->FindBin (500)) << end
 //h_MWW_mg->Scale (1. / ratio->GetBinContent (ratio->FindBin (500)))
 
 h_MWW_mg->Draw ("histsame")
+c1.Print ("spectra.pdf", "pdf")
 
 TCanvas c2
+diff->SetTitle ("")
 diff->Draw ("hist")
+c2.Print ("diff.pdf", "pdf")
 
 TCanvas c3
+ratio->SetTitle ("")
 ratio->Draw ("hist")
+c3.Print ("ratio.pdf", "pdf")
 
 TCanvas c4
+h_MWW_mg->SetTitle ("")
 h_MWW_mg->Draw ("hist")
 diff->Draw ("histsame")
+c4.Print ("signals.pdf", "pdf")
+
+h_MWW_mg->Rebin (2)
+diff->Rebin (2)
 
 
 */
