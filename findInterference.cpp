@@ -157,7 +157,7 @@ struct histos
   histos (TString name, double XS) : m_name (name), m_XS (XS)
     {
       m_h_MWW = new TH1F (TString ("h_MWW_") + name, 
-                          TString ("h_MWW_") + name, 200., 200., 2000.) ;
+                          TString ("h_MWW_") + name, 90., 200., 2000.) ;
       m_h_MWW->Sumw2 () ;
       m_h_scale = new TH1F (TString ("h_scale_") + name, 
                           TString ("h_scale_") + name, 100, 0., 1000.) ;
@@ -359,52 +359,3 @@ int main (int argc, char ** argv)
 
   return 0 ;
 }
-
-/*
-
-TCanvas c1
-c1.DrawFrame (100,0.00001,2000,0.01)
-h_MWW_phbkg->SetStats (0)
-h_MWW_phbkgsig->SetStats (0)
-h_MWW_mg->SetStats (0)
-h_MWW_phbkg->SetLineColor (kOrange)
-h_MWW_phbkg->SetLineWidth (2)
-h_MWW_phbkg->Draw ("histsame")
-h_MWW_phbkgsig->SetLineColor (kRed)
-h_MWW_phbkgsig->SetLineWidth (2)
-h_MWW_phbkgsig->Draw ("histsame")
-
-TH1F * diff = (TH1F *) h_MWW_phbkgsig->Clone ("diff")
-diff->SetTitle ("")
-diff->Add (h_MWW_phbkg, -1) 
-
-TH1F * ratio = (TH1F *) h_MWW_mg->Clone ("ratio") 
-ratio->SetTitle ("")
-ratio->Divide (diff)
-cout << "scaling by " << 1. / ratio->GetBinContent (ratio->FindBin (500)) << endl ;
-//h_MWW_mg->Scale (1. / ratio->GetBinContent (ratio->FindBin (500)))
-
-h_MWW_mg->Draw ("histsame")
-c1.Print ("spectra.pdf", "pdf")
-
-TCanvas c2
-diff->SetTitle ("")
-diff->Draw ("hist")
-c2.Print ("diff.pdf", "pdf")
-
-TCanvas c3
-ratio->SetTitle ("")
-ratio->Draw ("hist")
-c3.Print ("ratio.pdf", "pdf")
-
-TCanvas c4
-h_MWW_mg->SetTitle ("")
-h_MWW_mg->Draw ("hist")
-diff->Draw ("histsame")
-c4.Print ("signals.pdf", "pdf")
-
-h_MWW_mg->Rebin (2)
-diff->Rebin (2)
-
-
-*/
