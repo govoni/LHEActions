@@ -90,24 +90,20 @@ Double_t logAndExp (Double_t * xx, Double_t * par)
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 
-int macro_findInterferece ()                                                        
+int macro_findInterferece (TString filename)                                                        
 {        
-  TFile * f = new TFile ("findInterference.root") ;
+  TFile * f = new TFile (filename) ;
   TH1F * h_MWW_phbkgsig = (TH1F *) f->Get ("h_MWW_phbkgsig") ;
   TH1F * h_MWW_phbkg = (TH1F *) f->Get ("h_MWW_phbkg") ;
   TH1F * h_MWW_mg = (TH1F *) f->Get ("h_MWW_mg") ;
                                                                            
-  TCanvas * c1 = new TCanvas () ;
-  c1.DrawFrame (100, 0.00001, 2000, 0.01) ;
   h_MWW_phbkg->SetStats (0) ;
   h_MWW_phbkgsig->SetStats (0) ;
   h_MWW_mg->SetStats (0) ;
   h_MWW_phbkg->SetLineColor (kOrange) ;
   h_MWW_phbkg->SetLineWidth (2) ;
-  h_MWW_phbkg->Draw ("histsame") ;
   h_MWW_phbkgsig->SetLineColor (kRed) ;
   h_MWW_phbkgsig->SetLineWidth (2) ;
-  h_MWW_phbkgsig->Draw ("histsame") ;
 
   TH1F * diff = (TH1F *) h_MWW_phbkgsig->Clone ("diff") ;
   diff->SetTitle ("") ;
@@ -117,16 +113,34 @@ int macro_findInterferece ()
   ratio->GetXaxis ()->SetTitle (ratio->GetName ()) ;
   ratio->SetTitle ("") ;
   ratio->Divide (diff) ;
-  cout << "scaling by " << 1. / ratio->GetBinContent (ratio->FindBin (500)) << endl ;
+  //cout << "scaling by " << 1. / ratio->GetBinContent (ratio->FindBin (500)) << endl ;
   //h_MWW_mg->Scale (1. / ratio->GetBinContent (ratio->FindBin (500))) ;
 
+  TH1F * delta = (TH1F *) h_MWW_mg->Clone ("delta") ;
+  delta->SetTitle ("") ;
+  delta->Add (diff, -1) ;
+  delta->SetLineColor (kGreen + 2) ;
+
+  TH1F * relDiff = delta->Clone ("relDiff") ;
+  relDiff->Divide (h_MWW_mg) ;
+
+  //PG initial spectra
+
+  TCanvas * c1 = new TCanvas () ;
+  c1.DrawFrame (100, 0.00001, 2000, 0.02) ;
+  h_MWW_phbkg->Draw ("histsame") ;
+  h_MWW_phbkgsig->Draw ("histsame") ;
   h_MWW_mg->Draw ("histsame") ;
   c1->Print ("spectra.pdf", "pdf") ;
+
+  //PG SBI - B
 
   TCanvas * c2 = new TCanvas () ;
   diff->SetTitle ("") ;
   diff->Draw ("hist") ;
   c2->Print ("diff.pdf", "pdf") ;
+
+  //PG S / (SBI - S)
 
   TCanvas * c3 = new TCanvas () ;
   ratio->SetTitle ("") ;
@@ -134,30 +148,21 @@ int macro_findInterferece ()
   ratio->Draw ("Esame") ;
   c3->Print ("ratio.pdf", "pdf") ;
 
+  //PG S only, and (SBI - B)
+
   TCanvas * c4 = new TCanvas () ;
   h_MWW_mg->SetTitle ("") ;
   h_MWW_mg->Draw ("hist") ;
   diff->Draw ("histsame") ;
   c4->Print ("signals.pdf", "pdf") ;
 
+  //PG (SBI - B) - S and S
+
   TCanvas * c5 = new TCanvas () ;
-  TH1F * delta = (TH1F *) h_MWW_mg->Clone ("delta") ;
-  delta->SetTitle ("") ;
-  delta->Add (diff, -1) ;
   delta->Draw ("hist") ;
+  h_MWW_mg->Draw ("histsame") ;
 
   c5->Print ("delta.pdf", "pdf") ;
-
-  TCanvas * c6 = new TCanvas () ;
-
-  TH1F * diff = (TH1F *) h_MWW_phbkgsig->Clone ("diff") ;
-  diff->SetTitle ("") ;
-  diff->Add (h_MWW_phbkg, -1) ;
-
-  TH1F * delta = (TH1F *) h_MWW_mg->Clone ("delta") ;
-  delta->SetTitle ("") ;
-  delta->Add (diff, -1) ;
-  delta->Draw ("hist") ;
 
 //  TF1 * func = new TF1 ("func","[2] * sin([0] * x) + [1]",0, 2000) ;
 //  func->SetParameter (0, -0.005) ;
@@ -251,6 +256,11 @@ int macro_findInterferece ()
   func6->SetParName (5, "secondSlope") ;
 
   delta->Fit ("func6", "+", "", 200, 2000) ;
+
+  TCanvas * c6 = new TCanvas () ;
+  relDiff->Draw ("hist") ;
+
+  c6->Print ("relDiff.pdf", "pdf") ;
 
 
 }                                                                                   
