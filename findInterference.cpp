@@ -157,7 +157,7 @@ struct histos
   histos (TString name, double XS) : m_name (name), m_XS (XS)
     {
       m_h_MWW = new TH1F (TString ("h_MWW_") + name, 
-                          TString ("h_MWW_") + name, 90., 200., 2000.) ;
+                          TString ("h_MWW_") + name, 70., 200., 2000.) ;
       m_h_MWW->Sumw2 () ;
       m_h_scale = new TH1F (TString ("h_scale_") + name, 
                           TString ("h_scale_") + name, 100, 0., 1000.) ;
@@ -314,7 +314,8 @@ int main (int argc, char ** argv)
 
   //PG ---- madgraph ---- signal only
   
-  string filename_mg = "/Users/govoni/data/lvjj_samples/interference/madgraph/madgraph_500GeV_4jlv.lhe" ;
+//  string filename_mg = "/Users/govoni/data/lvjj_samples/interference/madgraph/madgraph_500GeV_4jlv.lhe" ;
+  string filename_mg = "/Users/govoni/data/lvjj_samples/interference/madgraph/H800_lvl4jets.lhe" ;
   double XS_mg = 0.009129 ; // pb
   
   std::ifstream ifs_mg (filename_mg.c_str ()) ;
@@ -338,8 +339,8 @@ int main (int argc, char ** argv)
 
   //PG ---- phantom ---- background and signal
 
-  string filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/4jlv/genh500/total.lhe" ;
-//  string filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/4jlv/genh800/total.lhe" ;
+//  string filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/4jlv/genh500/total.lhe" ;
+  string filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/4jlv/genh800/total.lhe" ;
   double XS_phbkgsig = 0.078904216 * 2 ; // 7.890421624985394E-002 // pb
   
   std::ifstream ifs_phbkgsig (filename_phbkgsig.c_str ()) ;
