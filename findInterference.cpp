@@ -157,7 +157,7 @@ struct histos
   histos (TString name, double XS) : m_name (name), m_XS (XS)
     {
       m_h_MWW = new TH1F (TString ("h_MWW_") + name, 
-                          TString ("h_MWW_") + name, 100., 200., 1000.) ;
+                          TString ("h_MWW_") + name, 200., 200., 1800.) ;
       m_h_MWW->Sumw2 () ;
       m_h_scale = new TH1F (TString ("h_scale_") + name, 
                           TString ("h_scale_") + name, 100, 0., 1000.) ;
@@ -285,7 +285,6 @@ fillHistos (LHEF::Reader & reader, histos & Histos, double XS, double referenceS
         weight = LHAPDF::xfx (x[0], referenceScale, flavour[0]) * LHAPDF::xfx (x[1], referenceScale, flavour[1]) /
                  (LHAPDF::xfx (x[0], scale, flavour[0]) * LHAPDF::xfx (x[1], scale, flavour[1])) ;
 
-      if (totalCount < 10) cout << "WEIGHT " << weight << endl ; //PG DEBUG
       Histos.m_h_MWW->Fill (total.M (), weight) ;
       totalCount += weight ;
 
@@ -311,44 +310,71 @@ int main (int argc, char ** argv)
 
   LHAPDF::initPDF (0) ;
 
+  if (argc < 2) 
+    {
+      cout << "mass is missing" << endl ;
+      exit (1) ;
+    }
+
+  double mass = atof (argv[1]) ;
+  if (mass != 500 && mass != 800)
+    {
+      cout << "wrong mass: " << mass << endl ;
+      exit (1) ;
+    }
+
+  //PG choose the samples
+  //PG ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+  string filename_phbkg = "/Users/govoni/data/lvjj_samples/interference/4jlv_h126/genh126/total.lhe" ;
+  double XS_phbkg = 0.07762748 * 2 ; // 7.76274847686845293E-002 // pb the factor 2 accounts for muons, electrons
+
+  string filename_mg = "" ;
+  double XS_mg = -1 ;
+  string filename_phbkgsig = "" ;
+  double XS_phbkgsig = -1 ;
+
+  if (mass == 500)
+    {
+      filename_mg = "/Users/govoni/data/lvjj_samples/interference/madgraph/madgraph_500GeV_4jlv.lhe" ;
+      XS_mg = 0.009129 ; // pb 500 GeV
+    
+      filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/4jlv/genh500/total.lhe" ;
+      XS_phbkgsig = 0.078904216 * 2 ; // 7.890421624985394E-002 // pb 500 GeV
+    }
+  else if (mass == 800)
+    {
+      filename_mg = "/Users/govoni/data/lvjj_samples/interference/madgraph/H800_lvl4jets.lhe" ;
+      XS_mg = 0.0014136 ; // pb 800 GeV
+      
+      filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/4jlv/genh800/total.lhe" ;
+      XS_phbkgsig = 0.075067956 * 2 ; // 7.506795619825214E-002 // pb 800 GeV
+    }
 
   //PG ---- madgraph ---- signal only
-  
-  string filename_mg = "/Users/govoni/data/lvjj_samples/interference/madgraph/madgraph_500GeV_4jlv.lhe" ;
-//  string filename_mg = "/Users/govoni/data/lvjj_samples/interference/madgraph/H800_lvl4jets.lhe" ;
-  double XS_mg = 0.009129 ; // pb 500 GeV
-//  double XS_mg = 0.0014136 ; // pb 800 GeV
   
   std::ifstream ifs_mg (filename_mg.c_str ()) ;
   LHEF::Reader reader_mg (ifs_mg) ;
   histos H_mg ("mg", XS_mg) ;
-  double entries_mg = fillHistos (reader_mg, H_mg, XS_mg, 500.) ;
+  double entries_mg = fillHistos (reader_mg, H_mg, XS_mg, mass) ;
 
   cout << "madgraph events : " << entries_mg << endl ;
   
   //PG ---- phantom ---- background only
 
-  string filename_phbkg = "/Users/govoni/data/lvjj_samples/interference/4jlv_h126/genh126/total.lhe" ;
-  double XS_phbkg = 0.07762748 * 2 ; // 7.76274847686845293E-002 // pb the factor 2 accounts for muons, electrons
-  
   std::ifstream ifs_phbkg (filename_phbkg.c_str ()) ;
   LHEF::Reader reader_phbkg (ifs_phbkg) ;
   histos H_phbkg ("phbkg", XS_phbkg) ;
-  double entries_phbkg = fillHistos (reader_phbkg, H_phbkg, XS_phbkg, 500.) ;
+  double entries_phbkg = fillHistos (reader_phbkg, H_phbkg, XS_phbkg, mass) ;
 
   cout << "phantom bkg events : " << entries_phbkg << endl ;
 
   //PG ---- phantom ---- background and signal
 
-  string filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/4jlv/genh500/total.lhe" ;
-//  string filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/4jlv/genh800/total.lhe" ;
-  double XS_phbkgsig = 0.078904216 * 2 ; // 7.890421624985394E-002 // pb 500 GeV
-//  double XS_phbkgsig = 0.075067956 * 2 ; // 7.506795619825214E-002 // pb 800 GeV
-  
   std::ifstream ifs_phbkgsig (filename_phbkgsig.c_str ()) ;
   LHEF::Reader reader_phbkgsig (ifs_phbkgsig) ;
   histos H_phbkgsig ("phbkgsig", XS_phbkgsig) ;
-  double entries_phbkgsig = fillHistos (reader_phbkgsig, H_phbkgsig, XS_phbkgsig, 500.) ;
+  double entries_phbkgsig = fillHistos (reader_phbkgsig, H_phbkgsig, XS_phbkgsig, mass) ;
 
   cout << "phantom bkg+sig events : " << entries_phbkgsig << endl ;
 
@@ -359,6 +385,10 @@ int main (int argc, char ** argv)
   H_phbkg.save (f) ;
   H_mg.save (f) ;
   f.Close () ;
+
+  cout << "madgraph signal (" << XS_mg << " pb):\n" << filename_mg << "\n" ;
+  cout << "phantom signal + bkg (" << XS_phbkgsig << " pb):\n" << filename_phbkgsig << "\n" ;
+  cout << "phantom bkg (" << XS_phbkg << " pb):\n" << filename_phbkg << "\n" ;
 
   return 0 ;
 }
