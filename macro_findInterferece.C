@@ -53,6 +53,19 @@ double doubleGausCrystalBallLowHigh (double* x, double* par)
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 
+void printArray (double * array, int N)
+{
+  cout << "double * params[" << N << "] = {" ;
+  for (int i = 0 ; i < N - 1 ; ++i)
+    cout << array[i] << ", " ;
+  cout << array[N-1] << "} ;\n" ;
+  return ;
+}
+
+
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+
 void setParNamesdoubleGausCrystalBallLowHigh (TF1 * func)
 {
   func->SetParName (1, "mean") ;
@@ -313,6 +326,13 @@ int macro_findInterferece (string filename, double mass)
   ratio->Draw ("EPsame") ;
   f_ratio->Draw ("same") ;
   c3->Print ("ratio.pdf", "pdf") ;
+
+  cout << "mass " << mass << "\n" ;
+  cout << "fitting results:\n-----------------\n" ;
+  cout << "S: \n" ;
+  printArray (func_ph_1->GetParameters (), 7) ;
+  cout << "SBI - B: \n" ;
+  printArray (func_mg_1->GetParameters (), 7) ;
 
   return 0 ; //PG FIXME
 
