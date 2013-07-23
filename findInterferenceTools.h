@@ -24,7 +24,6 @@ using namespace std ;
 typedef LorentzVector<ROOT::Math::PxPyPzE4D<double> > lorentzVector ;
 
 
-
 struct ptsort: public std::binary_function<TLorentzVector, TLorentzVector, bool>
 {
   bool operator () (const TLorentzVector & x, const TLorentzVector & y)
