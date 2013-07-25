@@ -81,9 +81,18 @@ void setParNamesdoubleGausCrystalBallLowHigh (TF1 * func)
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 
-Double_t crystalBallLowHighRatio (Double_t * xx, Double_t * par)
+Double_t crystalBallLowHighRatio (Double_t * xx, Double_t * par) // (SBI - B) / S
 {
   return crystalBallLowHigh (xx, par) / crystalBallLowHigh (xx, par + 7) ;
+}
+
+
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+
+Double_t relativeCrystalBallLowHighRatio (Double_t * xx, Double_t * par) // [(SBI - B) - S] / S
+{
+  return (crystalBallLowHigh (xx, par) - crystalBallLowHigh (xx, par + 7)) / crystalBallLowHigh (xx, par + 7) ;
 }
 
 
@@ -226,9 +235,9 @@ int macro_findInterferece (string filename, double mass)
   ratio->SetTitle ("") ;
   ratio->Divide (h_MWW_mg) ;
 
-  TH1F * delta = (TH1F *) h_MWW_mg->Clone ("delta") ;
+  TH1F * delta = (TH1F *) diff->Clone ("delta") ;
   delta->SetTitle ("") ;
-  delta->Add (diff, -1) ;
+  delta->Add (h_MWW_mg, -1) ;
   delta->SetLineColor (kGreen + 2) ;
 
   TH1F * relDiff = delta->Clone ("relDiff") ;
@@ -334,38 +343,64 @@ int macro_findInterferece (string filename, double mass)
   cout << "SBI - B: \n" ;
   printArray (func_mg_1->GetParameters (), 7) ;
 
-  return 0 ; //PG FIXME
+  //PG (SBI - B) - S and S
 
+  TCanvas * c5_1 = new TCanvas () ;
 
+  TF1 * f_relRatio = new TF1 ("f_relRatio", relativeCrystalBallLowHighRatio, 0, 2000, 14);
+  f_relRatio->SetLineWidth (3) ;
+  f_relRatio->SetLineColor (kGray + 2) ;
+  Double_t f_ratio_pars [14] ;
+  f_relRatio->SetParameters (f_ratio_pars) ;
+
+  TH1F * relInterf = (TH1F *) delta->Clone ("relInterf") ;
+  relInterf->Divide (h_MWW_mg) ;
+  relInterf->Draw ("EP") ;
+  f_relRatio->Draw ("same") ;
+  
+  c5_1->Print ("relRatio.pdf", "pdf") ;
 
   //PG (SBI - B) - S and S
 
   TCanvas * c5 = new TCanvas () ;
   delta->Draw ("hist") ;
-  h_MWW_mg->Draw ("histsame") ;
+//  h_MWW_mg->Draw ("histsame") ;
+
+  TF1 * retta = new TF1 ("retta", "pol1", 0, 2000) ;
+  retta->SetLineWidth (1) ;
+  retta->SetLineColor (kPink) ;
+  delta->Fit ("retta", "+", "", mass - 30, mass + 30) ;
+
+//  TF1 * expo = new TF1 ("expo", "-1 * exp ([0] * sqrt (fabs (x - [1])))", 0, 2000) ;
+  TF1 * expo = new TF1 ("expo", "-1 * exp ([0] * fabs (x - [1]))", 0, 2000) ;
+  expo->SetLineWidth (1) ;
+  expo->SetLineColor (kPink) ;
+  expo->FixParameter (1, mass) ;
+//  expo->SetParameter (0, - 0.04) ;
+
+  delta->Fit ("expo", "+", "", mass + 50, 2000) ;
+  
+  TF1 * func2 = new TF1 ("func2","-1 * [2] * (x - [0]) * exp (-1 * [3] * abs (x - [0])) + [1]",0, 2000) ;
+
+  func2->SetLineWidth (1) ;
+  func2->SetLineColor (kBlue) ;
+
+  func2->FixParameter (0, mass) ;
+  func2->FixParameter (1, 0.) ;
+
+  func2->SetParameter (2, retta->GetParameter (1)) ;
+  func2->SetParameter (3, expo->GetParameter (0)) ;
+
+//  delta->Fit ("func2", "+", "", 600, 2000) ;
+//  expo->Draw ("same") ;
 
   c5->Print ("delta.pdf", "pdf") ;
+  expo->Draw ("same") ;
+  
+  return 0 ; //PG FIXME
 
 
-//  TF1 * func = new TF1 ("func","[2] * sin([0] * x) + [1]",0, 2000) ;
-//  func->SetParameter (0, -0.005) ;
-//  func->SetParameter (1, 0) ;
-//  func->SetParameter (2, 0.0005) ;
-//  func->Draw ("same") ;
-//
-//  TF1 * func1 = new TF1 ("func1","[2] * sin([0] * sqrt (x)) + [1]",0, 2000) ;
-//  func1->SetParameter (0, -0.005) ;
-//  func1->SetParameter (1, 0) ;
-//  func1->SetParameter (2, 0.0005) ;
 
-//  TF1 * func2 = new TF1 ("func2"," [2] * (x - [0]) * exp (-1 * [3] * abs (x - [0])) + [1]",0, 2000) ;
-//
-//  func2->FixParameter (0, mass)
-//  func2->FixParameter (1, 0.)
-//
-//  func2->SetParameter (2, 0.0005) ;
-//  func2->SetParameter (3, 0.05) ;
-//  delta->Fit ("func2", "", "", 200, 2000) ;
 
 
   TF1 * func3 = new TF1 ("func3", doubleSlope, 0, 2000, 5) ;
