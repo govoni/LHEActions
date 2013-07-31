@@ -56,6 +56,11 @@ int main(int argc, char ** argv)
                      ) ;
                    float p2 = dummy.Vect ().Mag2 () ;
                    float scale = sqrt (1 + k2 / p2) ;
+                   if (p2 < (-1 * k2))
+                     {
+                       cout << "warning: p2 is smaller than the mass difference " << p2 << endl ;
+                       scale = 1 ;                     
+                     }
                    reader.hepeup.PUP.at (iPart).at (0) *= scale ; // px
                    reader.hepeup.PUP.at (iPart).at (1) *= scale ; // px
                    reader.hepeup.PUP.at (iPart).at (2) *= scale ; // px
