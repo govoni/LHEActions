@@ -11,7 +11,7 @@
 using namespace std ;
 
 
-int main(int argc, char ** argv) 
+int main (int argc, char ** argv) 
 {
   if(argc < 3)
     {
@@ -26,18 +26,21 @@ int main(int argc, char ** argv)
   ofstream outputStream (argv[2]) ;
   LHEF::Writer writer (outputStream) ;
 
-  writer.headerBlock() << reader.headerBlock ;
-  writer.initComments() << reader.initComments ;
+  writer.headerBlock () << reader.headerBlock ;
+  writer.initComments () << reader.initComments ;
   writer.heprup = reader.heprup ;
   writer.init () ;
 
 //PG mu massless in phantom
 //  float k2 = 0.1056583715 * 0.1056583715 - 1.77682 * 1.77682 ; // GeV -3.14592562093
   float k2 = 0. - 1.77682 * 1.77682 ; // GeV -3.14592562093
+
+  int count = 0 ;
   //PG loop over input events
   while (reader.readEvent ()) 
     {
-      if ( reader.outsideBlock.length() ) std::cout << reader.outsideBlock;
+      ++count ;
+      if ( reader.outsideBlock.length ()) std::cout << reader.outsideBlock;
 
       // loop over particles in the event
       for (int iPart = 0 ; iPart < reader.hepeup.IDUP.size (); ++iPart) 
@@ -55,7 +58,13 @@ int main(int argc, char ** argv)
                        reader.hepeup.PUP.at (iPart).at (3) // E
                      ) ;
                    float p2 = dummy.Vect ().Mag2 () ;
+
                    float scale = sqrt (1 + k2 / p2) ;
+                   if (p2 < (-1 * k2))
+                     {
+                       cout << "warning: p2 is smaller than the mass difference " << p2 << endl ;
+                       scale = 1 ;                     
+                     }
                    reader.hepeup.PUP.at (iPart).at (0) *= scale ; // px
                    reader.hepeup.PUP.at (iPart).at (1) *= scale ; // px
                    reader.hepeup.PUP.at (iPart).at (2) *= scale ; // px
@@ -67,11 +76,16 @@ int main(int argc, char ** argv)
                if (reader.hepeup.IDUP.at (iPart) == -14) reader.hepeup.IDUP.at (iPart) = -16 ;
              } // outgoing particles
         } // loop over particles in the event
-      writer.eventComments() << reader.eventComments;
-      writer.hepeup = reader.hepeup;
-      writer.writeEvent();
+      writer.eventComments () << reader.eventComments ;
+      writer.hepeup = reader.hepeup ;
+      bool written = writer.writeEvent () ;
+      if (!written)
+        {
+          cout << "warning: event " << count << " not written" << endl ;
+        }
 
     } //PG loop over input events
 
+  cout << "end loop over " << count << " events" << endl ;
   return 0 ;
 }
