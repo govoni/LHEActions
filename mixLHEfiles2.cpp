@@ -49,6 +49,8 @@ int main (int argc, char ** argv)
   vector<double> mixEventsXS ;
   double totXS = 0. ;
 
+  //PG read the list of files and corresponding cross-sections
+ 
   string line;
   ifstream myfile (argv[1]);
   if (myfile.is_open ())
