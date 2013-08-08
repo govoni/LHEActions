@@ -1,4 +1,4 @@
-// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+w// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 
 /*** double crystall ball ***/
@@ -150,8 +150,6 @@ Double_t parabolicAndExp (Double_t * xx, Double_t * par)
 }
 
 
-
-
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 
@@ -207,6 +205,20 @@ Double_t logAndExp (Double_t * xx, Double_t * par)
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 
+int findBin (TH1F * h, double val)
+{
+  int i = 1 ;
+  for ( ; i <= h->GetNbinsX () ; ++i)
+    {
+      if (h->GetBinLowEdge (i) > val) break ;
+    } 
+  return i - 1 ;  
+}
+
+
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+
 int macro_findInterferece (string filename, double mass)                                                        
 {        
 
@@ -214,43 +226,82 @@ int macro_findInterferece (string filename, double mass)
 
   TFile * f = new TFile (filename.c_str ()) ;
   TH1F * h_MWW_phbkgsig = (TH1F *) f->Get ("h_MWW_phbkgsig") ;
-  TH1F * h_MWW_phbkg = (TH1F *) f->Get ("h_MWW_phbkg") ;
-  TH1F * h_MWW_mg = (TH1F *) f->Get ("h_MWW_mg") ;
+  TH1F * h_MWW_phbkg    = (TH1F *) f->Get ("h_MWW_phbkg") ;
+  TH1F * h_MWW_mg       = (TH1F *) f->Get ("h_MWW_mg") ;
                                                                            
+  //PG graphics
+  //PG ---- ---- ---- ---- ---- ---- ---- ---- ----
+
   h_MWW_phbkg->SetStats (0) ;
-  h_MWW_phbkgsig->SetStats (0) ;
-  h_MWW_mg->SetStats (0) ;
+  h_MWW_phbkg->SetTitle ("") ;
   h_MWW_phbkg->SetLineColor (kOrange) ;
   h_MWW_phbkg->SetLineWidth (2) ;
+  h_MWW_phbkg->GetXaxis ()->SetTitle ("m_{WW} (GeV)") ;
+  h_MWW_phbkgsig->SetStats (0) ;
+  h_MWW_phbkgsig->SetTitle ("") ;
   h_MWW_phbkgsig->SetLineColor (kRed) ;
   h_MWW_phbkgsig->SetLineWidth (2) ;
+  h_MWW_phbkgsig->GetXaxis ()->SetTitle ("m_{WW} (GeV)") ;
+  h_MWW_mg->SetStats (0) ;
+  h_MWW_mg->SetTitle ("") ;
+  h_MWW_mg->SetLineColor (kBlue) ;
+  h_MWW_mg->SetLineWidth (2) ;
+  h_MWW_mg->GetXaxis ()->SetTitle ("m_{WW} (GeV)") ;
 
+  //PG histograms operations
+  //PG ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+  //PG SBI - B
   TH1F * diff = (TH1F *) h_MWW_phbkgsig->Clone ("diff") ;
-  diff->SetTitle ("") ;
   diff->Add (h_MWW_phbkg, -1) ;
+  diff->SetLineColor (kGreen + 1) ;
 
+  //PG (SBI - B) / S
   TH1F * ratio = (TH1F *) diff->Clone ("ratio") ;
-  ratio->GetXaxis ()->SetTitle (ratio->GetName ()) ;
-  ratio->GetYaxis ()->SetTitle ("(SBI - B) / S") ;
-  ratio->SetTitle ("") ;
   ratio->Divide (h_MWW_mg) ;
 
+  //PG (SBI - B) - S
   TH1F * delta = (TH1F *) diff->Clone ("delta") ;
   delta->SetTitle ("") ;
   delta->Add (h_MWW_mg, -1) ;
   delta->SetLineColor (kGreen + 2) ;
 
+  //PG ((SBI - B) - S) / S
   TH1F * relDiff = delta->Clone ("relDiff") ;
   relDiff->Divide (h_MWW_mg) ;
 
+  //PG plotting
+  //PG ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+  TString suffix = "." ; 
+  suffix += mass ;
+  suffix += ".pdf" ;
+  
   //PG initial spectra
 
   TCanvas * c1 = new TCanvas () ;
-  c1->DrawFrame (200, 0.00001, 2 * mass, 0.02) ;
+  double ymax = h_MWW_phbkgsig->GetBinContent (h_MWW_phbkgsig->GetMaximumBin ()) ;
+  double ymin = h_MWW_mg->GetBinContent (findBin (h_MWW_mg, mass + exp (mass * 0.0058461 + 0.65385))) ;
+  TH1F * c1_frame = (TH1F *) c1->DrawFrame (200, 0.9 * ymin, 2 * mass, 1.1 * ymax) ;
+  c1_frame->SetTitle (0) ;
+  c1_frame->SetStats (0) ;
+  c1->SetLogy () ;
+  c1_frame->GetXaxis ()->SetTitle ("m_{WW}") ;
   h_MWW_phbkg->Draw ("histsame") ;
   h_MWW_phbkgsig->Draw ("histsame") ;
   h_MWW_mg->Draw ("histsame") ;
-  c1->Print ("spectra.pdf", "pdf") ;
+
+  c1_leg = new TLegend (0.6,0.8,0.9,0.95) ;
+  c1_leg->SetFillStyle (0) ;
+  c1_leg->SetBorderSize (0) ;
+  c1_leg->SetTextFont (42) ;
+  c1_leg->AddEntry (h_MWW_phbkg, "B","l") ;
+  c1_leg->AddEntry (h_MWW_phbkgsig, "SBI","l") ;
+  c1_leg->AddEntry (h_MWW_mg, "S","l") ;
+  c1_leg->Draw () ;
+  
+  c1->Print (TString ("spectra") + suffix, "pdf") ;
+  
 
   //PG S only, and (SBI - B)
 
@@ -258,7 +309,16 @@ int macro_findInterferece (string filename, double mass)
   h_MWW_mg->SetTitle ("") ;
   h_MWW_mg->Draw ("hist") ;
   diff->Draw ("histsame") ;
-  c4->Print ("signals.pdf", "pdf") ;
+  c4_leg = new TLegend (0.6,0.8,0.9,0.95) ;
+  c4_leg->SetFillStyle (0) ;
+  c4_leg->SetBorderSize (0) ;
+  c4_leg->SetTextFont (42) ;
+  c4_leg->AddEntry (diff, "SBI - B","l") ;
+  c4_leg->AddEntry (h_MWW_mg, "S","l") ;
+  c4_leg->Draw () ;
+  c4->Print (TString ("signals") + suffix, "pdf") ;
+
+  return 0 ;
 
   //PG S only
   
