@@ -264,7 +264,7 @@ int macro_findInterferece (string filename, double mass)
   TH1F * delta = (TH1F *) diff->Clone ("delta") ;
   delta->SetTitle ("") ;
   delta->Add (h_MWW_mg, -1) ;
-  delta->SetLineColor (kGreen + 2) ;
+  delta->SetLineColor (kViolet + 1) ;
 
   //PG ((SBI - B) - S) / S
   TH1F * relDiff = delta->Clone ("relDiff") ;
@@ -277,16 +277,16 @@ int macro_findInterferece (string filename, double mass)
   suffix += mass ;
   suffix += ".pdf" ;
   
-  //PG initial spectra
+  //PG initial spectra ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
   TCanvas * c1 = new TCanvas () ;
   double ymax = h_MWW_phbkgsig->GetBinContent (h_MWW_phbkgsig->GetMaximumBin ()) ;
   double ymin = h_MWW_mg->GetBinContent (findBin (h_MWW_mg, mass + exp (mass * 0.0058461 + 0.65385))) ;
-  TH1F * c1_frame = (TH1F *) c1->DrawFrame (200, 0.9 * ymin, 2 * mass, 1.1 * ymax) ;
+  TH1F * c1_frame = (TH1F *) c1->DrawFrame (200, 0.2 * ymin, 2 * mass, 1.1 * ymax) ;
   c1_frame->SetTitle (0) ;
   c1_frame->SetStats (0) ;
   c1->SetLogy () ;
-  c1_frame->GetXaxis ()->SetTitle ("m_{WW}") ;
+  c1_frame->GetXaxis ()->SetTitle ("m_{WW} (GeV)") ;
   h_MWW_phbkg->Draw ("histsame") ;
   h_MWW_phbkgsig->Draw ("histsame") ;
   h_MWW_mg->Draw ("histsame") ;
@@ -302,129 +302,116 @@ int macro_findInterferece (string filename, double mass)
   
   c1->Print (TString ("spectra") + suffix, "pdf") ;
   
-
-  //PG S only, and (SBI - B)
+  //PG S only, and (SBI - B) ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
   TCanvas * c4 = new TCanvas () ;
+  double ymax = h_MWW_mg->GetBinContent (h_MWW_mg->GetMaximumBin ()) ;
+  double ymax2 = diff->GetBinContent (diff->GetMaximumBin ()) ;
+  if (ymax2 > ymax) ymax = ymax2 ;
+  double ymin = delta->GetBinContent (delta->GetMinimumBin ()) ;
+  TH1F * c4_frame = (TH1F *) c4->DrawFrame (200, ymin, 2 * mass, 1.1 * ymax) ;
+  c4_frame->SetTitle (0) ;
+  c4_frame->SetStats (0) ;
+  c4_frame->GetXaxis ()->SetTitle ("m_{WW} (GeV)") ;
   h_MWW_mg->SetTitle ("") ;
-  h_MWW_mg->Draw ("hist") ;
+  h_MWW_mg->Draw ("histsame") ;
   diff->Draw ("histsame") ;
-  c4_leg = new TLegend (0.6,0.8,0.9,0.95) ;
+  delta->Draw ("histsame") ;
+  c4_leg = new TLegend (0.5,0.8,0.9,0.95) ;
   c4_leg->SetFillStyle (0) ;
   c4_leg->SetBorderSize (0) ;
   c4_leg->SetTextFont (42) ;
   c4_leg->AddEntry (diff, "SBI - B","l") ;
   c4_leg->AddEntry (h_MWW_mg, "S","l") ;
+  c4_leg->AddEntry (delta, "(SBI - B) - S","l") ;
+  
   c4_leg->Draw () ;
+
+
   c4->Print (TString ("signals") + suffix, "pdf") ;
 
   return 0 ;
 
-  //PG S only
+  //PG S only ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
   
-  TCanvas * c4_mg = new TCanvas () ;
-  h_MWW_mg->SetTitle ("") ;
-  h_MWW_mg->Draw ("EP") ;
+//  TCanvas * c4_mg = new TCanvas () ;
+//  h_MWW_mg->SetTitle ("") ;
+//  h_MWW_mg->Draw ("EP") ;
+//
+//  TF1 * func_mg_1 = new TF1 ("func_mg_1", crystalBallLowHigh, 0, 2000, 7) ;
+//  func_mg_1->SetNpx (10000) ;
+//  func_mg_1->SetLineWidth (1) ;
+//  func_mg_1->SetLineColor (kBlue + 2) ;
+//
+//  setParNamesdoubleGausCrystalBallLowHigh (func_mg_1) ;
+//
+//  func_mg_1->SetParameter (0, 1.) ;                  // multiplicative scale
+//  func_mg_1->SetParameter (1, mass) ;                // mean
+//  func_mg_1->SetParameter (2, h_MWW_mg->GetRMS ()) ; // gaussian sigma
+//  func_mg_1->SetParameter (3, 1) ;                   // right junction
+//  func_mg_1->SetParameter (4, 1) ;                   // right power law order
+//  func_mg_1->SetParameter (5, 1) ;                   // left junction
+//  func_mg_1->SetParameter (6, 1) ;                   // left power law order
+//
+//  h_MWW_mg->Fit ("func_mg_1", "+", "", 0.5 * mass - 50, 2 * mass) ;
+//  c4_mg->Print ("signals_mg.pdf", "pdf") ;
+//
+//  //PG (SBI - B) only
+//
+//  TCanvas * c4_ph = new TCanvas () ;
+//  diff->SetTitle ("") ;
+//  diff->Draw ("EP") ;
+//
+//  TF1 * gauss = new TF1 ("gauss", "gaus", 0, 2000) ;
+//  gauss->SetLineWidth (1) ;
+//  gauss->SetLineColor (kGray + 2) ;
+//  diff->Fit ("gauss", "+", "", 0.75 * mass, mass * 1.25) ;
+//
+//  TF1 * func_ph_1 = new TF1 ("func_ph_1", crystalBallLowHigh, 0, 2000, 7) ;
+//  func_ph_1->SetNpx (10000) ;
+//  func_ph_1->SetLineWidth (1) ;
+//  func_ph_1->SetLineColor (kRed + 2) ;
+//  
+//  setParNamesdoubleGausCrystalBallLowHigh (func_ph_1) ;
+//
+//  func_ph_1->SetParameter (0, 1.) ;                      // multiplicative scale
+//  func_ph_1->SetParameter (1, mass) ;                    // mean
+//  func_ph_1->SetParameter (2, gauss->GetParameter (2)) ; // gaussian sigma
+//  func_ph_1->SetParameter (3, 1) ;                       // right junction
+//  func_ph_1->SetParameter (4, 2) ;                       // right power law order
+//  func_ph_1->SetParameter (5, 1) ;                       // left junction
+//  func_ph_1->SetParameter (6, 2) ;                       // left power law order
+//
+//  diff->Fit ("func_ph_1", "", "", 0.5 * mass - 50, 2 * mass) ;
+//  func_ph_1->SetParameters (func_ph_1->GetParameters ()) ;
+//  diff->Fit ("func_ph_1", "+L", "", 0.5 * mass - 50, 2 * mass) ;
+//
+//  c4_ph->Print ("signals_ph.pdf", "pdf") ;
 
-  TF1 * func_mg_1 = new TF1 ("func_mg_1", crystalBallLowHigh, 0, 2000, 7) ;
-  func_mg_1->SetNpx (10000) ;
-  func_mg_1->SetLineWidth (1) ;
-  func_mg_1->SetLineColor (kBlue + 2) ;
-
-  setParNamesdoubleGausCrystalBallLowHigh (func_mg_1) ;
-
-  func_mg_1->SetParameter (0, 1.) ;                  // multiplicative scale
-  func_mg_1->SetParameter (1, mass) ;                // mean
-  func_mg_1->SetParameter (2, h_MWW_mg->GetRMS ()) ; // gaussian sigma
-  func_mg_1->SetParameter (3, 1) ;                   // right junction
-  func_mg_1->SetParameter (4, 1) ;                   // right power law order
-  func_mg_1->SetParameter (5, 1) ;                   // left junction
-  func_mg_1->SetParameter (6, 1) ;                   // left power law order
-
-  h_MWW_mg->Fit ("func_mg_1", "+", "", 0.5 * mass - 50, 2 * mass) ;
-  c4_mg->Print ("signals_mg.pdf", "pdf") ;
-
-  //PG (SBI - B) only
-
-  TCanvas * c4_ph = new TCanvas () ;
-  diff->SetTitle ("") ;
-  diff->Draw ("EP") ;
-
-  TF1 * gauss = new TF1 ("gauss", "gaus", 0, 2000) ;
-  gauss->SetLineWidth (1) ;
-  gauss->SetLineColor (kGray + 2) ;
-  diff->Fit ("gauss", "+", "", 0.75 * mass, mass * 1.25) ;
-
-  TF1 * func_ph_1 = new TF1 ("func_ph_1", crystalBallLowHigh, 0, 2000, 7) ;
-  func_ph_1->SetNpx (10000) ;
-  func_ph_1->SetLineWidth (1) ;
-  func_ph_1->SetLineColor (kRed + 2) ;
-  
-  setParNamesdoubleGausCrystalBallLowHigh (func_ph_1) ;
-
-  func_ph_1->SetParameter (0, 1.) ;                      // multiplicative scale
-  func_ph_1->SetParameter (1, gauss->GetParameter (1)) ; // mean
-  func_ph_1->SetParameter (2, gauss->GetParameter (2)) ; // gaussian sigma
-  func_ph_1->SetParameter (3, 1) ;                       // right junction
-  func_ph_1->SetParameter (4, 2) ;                       // right power law order
-  func_ph_1->SetParameter (5, 1) ;                       // left junction
-  func_ph_1->SetParameter (6, 2) ;                       // left power law order
-
-  diff->Fit ("func_ph_1", "", "", 0.5 * mass - 50, 2 * mass) ;
-  func_ph_1->SetParameters (func_ph_1->GetParameters ()) ;
-  diff->Fit ("func_ph_1", "+L", "", 0.5 * mass - 50, 2 * mass) ;
-
-  c4_ph->Print ("signals_ph.pdf", "pdf") ;
-
-  //PG S / (SBI - S)
-
-  TF1 * f_ratio = new TF1 ("f_ratio", crystalBallLowHighRatio, 0, 2000, 14);
-  f_ratio->SetLineWidth (3) ;
-  f_ratio->SetLineColor (kGray + 2) ;
-  Double_t f_ratio_pars [14] ;
-  func_ph_1->GetParameters (f_ratio_pars) ;
-  func_mg_1->GetParameters (f_ratio_pars + 7) ;
-  f_ratio->SetParameters (f_ratio_pars) ;
-
-  TCanvas * c3 = new TCanvas () ;
-  c3->DrawFrame (200, -0.4, 2 * mass, 12) ;
-  ratio->SetTitle ("") ;
-  ratio->SetLineColor (kMagenta) ;
-  ratio->GetXaxis ()->SetTitle ("mWW") ;
-  ratio->GetYaxis ()->SetTitle ("(SBI - B) / S") ;
-  ratio->Draw ("EPsame") ;
-  f_ratio->Draw ("same") ;
-  c3->Print ("ratio.pdf", "pdf") ;
-
-  cout << "mass " << mass << "\n" ;
-  cout << "fitting results:\n-----------------\n" ;
-  cout << "S: \n" ;
-  printArray (func_ph_1->GetParameters (), 7) ;
-  cout << "SBI - B: \n" ;
-  printArray (func_mg_1->GetParameters (), 7) ;
-
-  //PG (SBI - B) - S and S
-
-  TCanvas * c5_1 = new TCanvas () ;
-
-  TF1 * f_relRatio = new TF1 ("f_relRatio", relativeCrystalBallLowHighRatio, 0, 2000, 14);
-  f_relRatio->SetLineWidth (3) ;
-  f_relRatio->SetLineColor (kGray + 2) ;
-  Double_t f_ratio_pars [14] ;
-  f_relRatio->SetParameters (f_ratio_pars) ;
-
-  TH1F * relInterf = (TH1F *) delta->Clone ("relInterf") ;
-  relInterf->Divide (h_MWW_mg) ;
-  relInterf->Draw ("EP") ;
-  f_relRatio->Draw ("same") ;
-  
-  c5_1->Print ("relRatio.pdf", "pdf") ;
+  //PG (SBI - B) - S and the two signals
+//
+//  TCanvas * c5_1 = new TCanvas () ;
+//
+//  TF1 * f_relRatio = new TF1 ("f_relRatio", relativeCrystalBallLowHighRatio, 0, 2000, 14);
+//  f_relRatio->SetLineWidth (3) ;
+//  f_relRatio->SetLineColor (kGray + 2) ;
+//  Double_t f_ratio_pars [14] ;
+//  f_relRatio->SetParameters (f_ratio_pars) ;
+//
+//  TH1F * relInterf = (TH1F *) delta->Clone ("relInterf") ;
+//  relInterf->Divide (h_MWW_mg) ;
+//  relInterf->Draw ("EP") ;
+//  f_relRatio->Draw ("same") ;
+//  
+//  c5_1->Print ("relRatio.pdf", "pdf") ;
 
   //PG (SBI - B) - S and S
 
   TCanvas * c5 = new TCanvas () ;
-  delta->Draw ("hist") ;
 //  h_MWW_mg->Draw ("histsame") ;
+
+
+
 
   TF1 * retta = new TF1 ("retta", "pol1", 0, 2000) ;
   retta->SetLineWidth (1) ;
@@ -456,6 +443,35 @@ int macro_findInterferece (string filename, double mass)
 
   c5->Print ("delta.pdf", "pdf") ;
   expo->Draw ("same") ;
+
+
+  //PG S / (SBI - S)
+
+  TF1 * f_ratio = new TF1 ("f_ratio", crystalBallLowHighRatio, 0, 2000, 14);
+  f_ratio->SetLineWidth (3) ;
+  f_ratio->SetLineColor (kGray + 2) ;
+  Double_t f_ratio_pars [14] ;
+  func_ph_1->GetParameters (f_ratio_pars) ;
+  func_mg_1->GetParameters (f_ratio_pars + 7) ;
+  f_ratio->SetParameters (f_ratio_pars) ;
+
+  TCanvas * c3 = new TCanvas () ;
+  c3->DrawFrame (200, -0.4, 2 * mass, 12) ;
+  ratio->SetTitle ("") ;
+  ratio->SetLineColor (kMagenta) ;
+  ratio->GetXaxis ()->SetTitle ("mWW") ;
+  ratio->GetYaxis ()->SetTitle ("(SBI - B) / S") ;
+  ratio->Draw ("EPsame") ;
+  f_ratio->Draw ("same") ;
+  c3->Print ("ratio.pdf", "pdf") ;
+
+  cout << "mass " << mass << "\n" ;
+  cout << "fitting results:\n-----------------\n" ;
+  cout << "S: \n" ;
+  printArray (func_ph_1->GetParameters (), 7) ;
+  cout << "SBI - B: \n" ;
+  printArray (func_mg_1->GetParameters (), 7) ;
+
   
   return 0 ; //PG FIXME
 
