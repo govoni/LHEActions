@@ -336,7 +336,7 @@ int main (int argc, char ** argv)
 
   //PG saving the histograms
 
-  TString name = "findInterferece." ;
+  TString name = "findInterference." ;
   name += mass ; 
   name += ".root" ;
   TFile f (name, "recreate") ;
