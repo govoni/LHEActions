@@ -280,7 +280,7 @@ int main (int argc, char ** argv)
       XS_mg = 0.019246 ; // pb 650 GeV
       
       filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/phantom/total.650.lhe" ;
-      XS_phbkgsig = 0.076244 ; // 7.62444816705E-002 // pb 650 GeV
+      XS_phbkgsig = 0.076244 * 2 ; // 7.62444816705E-002 // pb 650 GeV
     }
   else if (mass == 800)
     {
