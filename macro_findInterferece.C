@@ -404,7 +404,7 @@ int macro_findInterferece (string filename, double mass)
   TF1 * gauss = new TF1 ("gauss", "gaus", 0, 2000) ;
   gauss->SetLineWidth (1) ;
   gauss->SetLineColor (kGray + 2) ;
-  diff->Fit ("gauss", "+", "", 0.75 * mass, mass * 1.25) ;
+  diff->Fit ("gauss", "Q+", "", 0.75 * mass, mass * 1.25) ;
 
   TF1 * func_ph_1 = new TF1 ("func_ph_1", crystalBallLowHigh, 0, 2000, 7) ;
   func_ph_1->SetNpx (10000) ;
@@ -421,9 +421,9 @@ int macro_findInterferece (string filename, double mass)
   func_ph_1->SetParameter (5, 1) ;                       // left junction
   func_ph_1->SetParameter (6, 2) ;                       // left power law order
 
-  diff->Fit ("func_ph_1", "", "", 0.5 * mass - 50, 2 * mass) ;
+  diff->Fit ("func_ph_1", "Q", "", 0.5 * mass - 50, 2 * mass) ;
   func_ph_1->SetParameters (func_ph_1->GetParameters ()) ;
-  diff->Fit ("func_ph_1", "+L", "", 0.5 * mass - 50, 2 * mass) ;
+  diff->Fit ("func_ph_1", "Q+L", "", 0.5 * mass - 50, 2 * mass) ;
 
   ymax = diff->GetBinContent (diff->GetMaximumBin ()) ;
   ymin = diff->GetBinContent (diff->GetMinimumBin ()) ;
@@ -466,51 +466,52 @@ int macro_findInterferece (string filename, double mass)
       func_mg_1->GetParameter (2) * func_mg_1->GetParameter (2)  
     ) ;
   f_doublePeakModel->SetParameter (3, 2 * aveWidth) ;  
-  delta->Fit ("f_doublePeakModel", "+", "same", 0.5 * mass - 50, 2 * mass) ;
+  delta->Fit ("f_doublePeakModel", "Q+", "same", 0.5 * mass - 50, 2 * mass) ;
 
-  TF1 * func3 = new TF1 ("func3", doubleSlope, 0, 2000, 5) ;
-  func3->SetNpx (10000) ;
-  func3->SetLineWidth (1) ;
-  func3->SetLineColor (kGray + 2) ;
+//  TF1 * func3 = new TF1 ("func3", doubleSlope, 0, 2000, 5) ;
+//  func3->SetNpx (10000) ;
+//  func3->SetLineWidth (1) ;
+//  func3->SetLineColor (kGray + 2) ;
+//
+//  func3->SetParName (0, "centre") ;
+//  func3->SetParName (1, "shift") ;
+//  func3->SetParName (2, "scale") ;
+//  func3->SetParName (3, "slope_right") ;
+//  func3->SetParName (4, "slope_left") ;
+//
+//  //PG first fit, get the slope at the right with the mass hypothesis
+//  func3->FixParameter (0, mass) ;
+//  func3->FixParameter (1, 0.) ;
+//  func3->SetParameter (2, 0.0005) ;
+//  func3->SetParameter (3, 0.05) ;
+//  func3->SetParameter (4, 0.05) ;
+//  delta->Fit ("func3", "+", "same", mass, 2 * mass) ;
+//
+//  //PG second fit, get the centre given the slope
+//  func3->SetParLimits (0, mass - sqrt (mass), mass + sqrt (mass)) ;
+//  func3->FixParameter (1, 0.) ;
+//  func3->SetParameter (2, 0.0005) ;
+//  func3->FixParameter (3, func3->GetParameter (3)) ;
+//  func3->SetParameter (4, 0.05) ;
+//  delta->Fit ("func3", "+", "same", 0.5 * mass - 50, 2 * mass) ;
+//
+//  TF1 * func3_1 = new TF1 ("func3_1", singleSlope, 0, 2000, 5) ;
+//  func3_1->SetNpx (10000) ;
+//  func3_1->SetLineWidth (1) ;
+//  func3_1->SetLineColor (kGreen + 2) ;
+//  func3_1->SetParName (0, "centre") ;
+//  func3_1->SetParName (1, "shift") ;
+//  func3_1->SetParName (2, "scale") ;
+//  func3_1->SetParName (3, "slope") ;
+//
+//  //PG third fit, fix centre and slope and get the rest
+//  func3_1->SetParameter (0, func3->GetParameter (0)) ;
+//  func3_1->FixParameter (1, 0.) ;
+//  func3_1->SetParameter (2, 0.0005) ;
+//  func3_1->FixParameter (3, func3->GetParameter (3)) ;
+//
+//  delta->Fit ("func3_1", "+", "same", 0.7 * mass, 2 * mass) ;
 
-  func3->SetParName (0, "centre") ;
-  func3->SetParName (1, "shift") ;
-  func3->SetParName (2, "scale") ;
-  func3->SetParName (3, "slope_right") ;
-  func3->SetParName (4, "slope_left") ;
-
-  //PG first fit, get the slope at the right with the mass hypothesis
-  func3->FixParameter (0, mass) ;
-  func3->FixParameter (1, 0.) ;
-  func3->SetParameter (2, 0.0005) ;
-  func3->SetParameter (3, 0.05) ;
-  func3->SetParameter (4, 0.05) ;
-  delta->Fit ("func3", "+", "same", mass, 2 * mass) ;
-
-  //PG second fit, get the centre given the slope
-  func3->SetParLimits (0, mass - sqrt (mass), mass + sqrt (mass)) ;
-  func3->FixParameter (1, 0.) ;
-  func3->SetParameter (2, 0.0005) ;
-  func3->FixParameter (3, func3->GetParameter (3)) ;
-  func3->SetParameter (4, 0.05) ;
-  delta->Fit ("func3", "+", "same", 0.5 * mass - 50, 2 * mass) ;
-
-  TF1 * func3_1 = new TF1 ("func3_1", singleSlope, 0, 2000, 5) ;
-  func3_1->SetNpx (10000) ;
-  func3_1->SetLineWidth (1) ;
-  func3_1->SetLineColor (kGreen + 2) ;
-  func3_1->SetParName (0, "centre") ;
-  func3_1->SetParName (1, "shift") ;
-  func3_1->SetParName (2, "scale") ;
-  func3_1->SetParName (3, "slope") ;
-
-  //PG third fit, fix centre and slope and get the rest
-  func3_1->SetParameter (0, func3->GetParameter (0)) ;
-  func3_1->FixParameter (1, 0.) ;
-  func3_1->SetParameter (2, 0.0005) ;
-  func3_1->FixParameter (3, func3->GetParameter (3)) ;
-
-  delta->Fit ("func3_1", "+", "same", 0.7 * mass, 2 * mass) ;
   delta->Draw ("histsame") ;
   c3_leg = new TLegend (0.5,0.8,0.9,0.95) ;
   c3_leg->SetFillStyle (0) ;
@@ -552,6 +553,16 @@ int macro_findInterferece (string filename, double mass)
 
   c4->Print (TString ("signals") + suffix, "pdf") ;
 
+  //PG output of the fitting function parameters
+
+  std::ofstream outfile;
+
+  outfile.open ("graphs.txt", std::ios_base::app) ;
+  outfile << "tg_par0->SetPoint (i++," << mass << ", " << f_doublePeakModel->GetParameter (0) << ") ;\n" ;
+  outfile << "tg_par1->SetPoint (i++," << mass << ", " << f_doublePeakModel->GetParameter (1) << ") ;\n" ;
+  outfile << "tg_par2->SetPoint (i++," << mass << ", " << f_doublePeakModel->GetParameter (2) << ") ;\n" ;
+  outfile << "tg_par3->SetPoint (i++," << mass << ", " << f_doublePeakModel->GetParameter (3) << ") ;\n" ;
+  outfile.close () ;
 
   return 0 ;
 
