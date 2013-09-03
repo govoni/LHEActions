@@ -1,4 +1,13 @@
-w// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+/*
+r00t -q macro_findInterferece.C\(\"findInterference.350.root\",350\)
+r00t -q macro_findInterferece.C\(\"findInterference.500.root\",500\)
+r00t -q macro_findInterferece.C\(\"findInterference.650.root\",650\)
+r00t -q macro_findInterferece.C\(\"findInterference.800.root\",800\)
+r00t -q macro_findInterferece.C\(\"findInterference.1000.root\",1000\)
+*/
+
+
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 
 /*** double crystall ball ***/
@@ -143,9 +152,10 @@ Double_t doublePeakModel (Double_t * xx, Double_t * par)
   double distance = par[2] ;
   double gamma    = par[3] ;
   double x = xx[0] - shift ;
-  
+
+  double norm = 1. / (shift * shift + gamma) - 1 / ((shift + 2 * distance) * (shift + 2 * distance) + gamma) ;
+  return scale * (1. / norm) * ( 1. / ((x - distance) * (x - distance) + gamma) - 1 / ((x + distance) * (x + distance) + gamma)) ;
   return scale * ( 1. / ((x - distance) * (x - distance) + gamma) - 1 / ((x + distance) * (x + distance) + gamma)) ;
-  
 }
 
 
@@ -257,6 +267,7 @@ int macro_findInterferece (string filename, double mass)
 {        
 
   gSystem->Load ("Functions.cc") ;
+  gStyle->SetPadTopMargin (0.1) ;
 
   TFile * f = new TFile (filename.c_str ()) ;
   TH1F * h_MWW_phbkgsig = (TH1F *) f->Get ("h_MWW_phbkgsig") ;
@@ -384,7 +395,7 @@ int macro_findInterferece (string filename, double mass)
   func_mg_1->SetParameter (5, 1) ;                   // left junction
   func_mg_1->SetParameter (6, 1) ;                   // left power law order
 
-  h_MWW_mg->Fit ("func_mg_1", "+", "", 0.5 * mass - 50, 2 * mass) ;
+  h_MWW_mg->Fit ("func_mg_1", "Q+", "", 0.5 * mass - 50, 2 * mass) ;
 
   ymax = h_MWW_mg->GetBinContent (h_MWW_mg->GetMaximumBin ()) ;
   ymin = h_MWW_mg->GetBinContent (h_MWW_mg->GetMinimumBin ()) ;
@@ -448,7 +459,7 @@ int macro_findInterferece (string filename, double mass)
   c3_frame->GetXaxis ()->SetTitle ("m_{WW} (GeV)") ;
 
 
-  TF1 * f_doublePeakModel = new TF1 ("f_doublePeakModel", doublePeakModel, 0, 1000, 4) ;
+  TF1 * f_doublePeakModel = new TF1 ("f_doublePeakModel", doublePeakModel, 0, 2000, 4) ;
   f_doublePeakModel->SetNpx (10000) ;
   f_doublePeakModel->SetLineWidth (1) ;
   f_doublePeakModel->SetLineColor (kRed + 2) ;
@@ -466,7 +477,7 @@ int macro_findInterferece (string filename, double mass)
       func_mg_1->GetParameter (2) * func_mg_1->GetParameter (2)  
     ) ;
   f_doublePeakModel->SetParameter (3, 2 * aveWidth) ;  
-  delta->Fit ("f_doublePeakModel", "Q+", "same", 0.5 * mass - 50, 2 * mass) ;
+  delta->Fit ("f_doublePeakModel", "+", "same", 0.5 * mass - 50, 2 * mass) ;
 
 //  TF1 * func3 = new TF1 ("func3", doubleSlope, 0, 2000, 5) ;
 //  func3->SetNpx (10000) ;
@@ -558,17 +569,23 @@ int macro_findInterferece (string filename, double mass)
   std::ofstream outfile;
 
   outfile.open ("graphs.txt", std::ios_base::app) ;
+  outfile << "\n// MASS " << mass << " ---- ---- ---- \n\n" ;
   outfile << "tg_par0->SetPoint (i++," << mass << ", " << f_doublePeakModel->GetParameter (0) << ") ;\n" ;
   outfile << "tg_par1->SetPoint (i++," << mass << ", " << f_doublePeakModel->GetParameter (1) << ") ;\n" ;
   outfile << "tg_par2->SetPoint (i++," << mass << ", " << f_doublePeakModel->GetParameter (2) << ") ;\n" ;
   outfile << "tg_par3->SetPoint (i++," << mass << ", " << f_doublePeakModel->GetParameter (3) << ") ;\n" ;
+  outfile << "TF1 * func_" << mass << " = new TF1 (\"func_" << mass << "\",doublePeakModel, 0, 2000, 4) ;\n" ; 
+  outfile << "double params_" << mass << "[4] = {" << f_doublePeakModel->GetParameter (0) << ", " << f_doublePeakModel->GetParameter (1) << ", " << f_doublePeakModel->GetParameter (2) << ", " << f_doublePeakModel->GetParameter (3) << " } ;\n" ;
+  outfile << "func_" << mass << "->SetParameters (params_" << mass << ") ;\n\n" ; 
   outfile.close () ;
 
   return 0 ;
 
 
-
-
+// ===============================================================================
+// ===============================================================================
+// ===============================================================================
+// ===============================================================================
 
 
 
@@ -602,7 +619,7 @@ int macro_findInterferece (string filename, double mass)
   TF1 * retta = new TF1 ("retta", "pol1", 0, 2000) ;
   retta->SetLineWidth (1) ;
   retta->SetLineColor (kPink) ;
-  delta->Fit ("retta", "+", "", mass - 30, mass + 30) ;
+  delta->Fit ("retta", "Q+", "", mass - 30, mass + 30) ;
 
 //  TF1 * expo = new TF1 ("expo", "-1 * exp ([0] * sqrt (fabs (x - [1])))", 0, 2000) ;
   TF1 * expo = new TF1 ("expo", "-1 * exp ([0] * fabs (x - [1]))", 0, 2000) ;
@@ -611,7 +628,7 @@ int macro_findInterferece (string filename, double mass)
   expo->FixParameter (1, mass) ;
 //  expo->SetParameter (0, - 0.04) ;
 
-  delta->Fit ("expo", "+", "", mass + 50, 2000) ;
+  delta->Fit ("expo", "Q+", "", mass + 50, 2000) ;
   
   TF1 * func2 = new TF1 ("func2","-1 * [2] * (x - [0]) * exp (-1 * [3] * abs (x - [0])) + [1]",0, 2000) ;
 
@@ -681,7 +698,7 @@ int macro_findInterferece (string filename, double mass)
   func3->SetParName (3, "slope_right") ;
   func3->SetParName (4, "slope_left") ;
 
-  delta->Fit ("func3", "+", "", 0, 650) ;
+  delta->Fit ("func3", "Q+", "", 0, 650) ;
 
   TF1 * func4 = new TF1 ("func4", parabolicAndExp, 0, 2000, 5) ;
   func4->SetLineWidth (1) ;
@@ -699,7 +716,7 @@ int macro_findInterferece (string filename, double mass)
   func4->SetParName (3, "slope_right") ;
   func4->SetParName (4, "power_left") ;
 
-  delta->Fit ("func4", "+", "", 200, 2000) ;
+  delta->Fit ("func4", "+Q", "", 200, 2000) ;
 
 //  TF1 * func5 = new TF1 ("func5", sinusAndExp, 0, 2000, 5) ;
 //  func5->SetLineWidth (1) ;
@@ -753,7 +770,7 @@ int macro_findInterferece (string filename, double mass)
   func7->SetParName (3, "slope_right") ;
   func7->SetParName (4, "power_left") ;
 
-  delta->Fit ("func7", "+", "", 200, 2000) ;
+  delta->Fit ("func7", "+Q", "", 200, 2000) ;
 
 
   TCanvas * c6 = new TCanvas () ;
