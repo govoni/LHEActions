@@ -395,7 +395,9 @@ int macro_findInterferece (string filename, double mass)
   func_mg_1->SetParameter (5, 1) ;                   // left junction
   func_mg_1->SetParameter (6, 1) ;                   // left power law order
 
-  h_MWW_mg->Fit ("func_mg_1", "Q+", "", 0.5 * mass - 50, 2 * mass) ;
+  int sign = 1 ;
+  if (mass < 400) sign = -1 ;
+  h_MWW_mg->Fit ("func_mg_1", "Q+", "", 0.5 * mass + sign * 50, 2 * mass) ;
 
   ymax = h_MWW_mg->GetBinContent (h_MWW_mg->GetMaximumBin ()) ;
   ymin = h_MWW_mg->GetBinContent (h_MWW_mg->GetMinimumBin ()) ;
@@ -569,14 +571,28 @@ int macro_findInterferece (string filename, double mass)
   std::ofstream outfile;
 
   outfile.open ("graphs.txt", std::ios_base::app) ;
-  outfile << "\n// MASS " << mass << " ---- ---- ---- \n\n" ;
-  outfile << "tg_par0->SetPoint (i++," << mass << ", " << f_doublePeakModel->GetParameter (0) << ") ;\n" ;
-  outfile << "tg_par1->SetPoint (i++," << mass << ", " << f_doublePeakModel->GetParameter (1) << ") ;\n" ;
-  outfile << "tg_par2->SetPoint (i++," << mass << ", " << f_doublePeakModel->GetParameter (2) << ") ;\n" ;
-  outfile << "tg_par3->SetPoint (i++," << mass << ", " << f_doublePeakModel->GetParameter (3) << ") ;\n" ;
-  outfile << "TF1 * func_" << mass << " = new TF1 (\"func_" << mass << "\",doublePeakModel, 0, 2000, 4) ;\n" ; 
-  outfile << "double params_" << mass << "[4] = {" << f_doublePeakModel->GetParameter (0) << ", " << f_doublePeakModel->GetParameter (1) << ", " << f_doublePeakModel->GetParameter (2) << ", " << f_doublePeakModel->GetParameter (3) << " } ;\n" ;
-  outfile << "func_" << mass << "->SetParameters (params_" << mass << ") ;\n\n" ; 
+  outfile << "  \n  // ----> MASS " << mass << " ---- ---- ---- \n\n" ;
+  outfile << "  // interference parametrisation:\n" ;
+  outfile << "  tg_par0->SetPoint (i, " << mass << ", " << f_doublePeakModel->GetParameter (0) << ") ;\n" ;
+  outfile << "  tg_par1->SetPoint (i, " << mass << ", " << f_doublePeakModel->GetParameter (1) << ") ;\n" ;
+  outfile << "  tg_par2->SetPoint (i, " << mass << ", " << f_doublePeakModel->GetParameter (2) << ") ;\n" ;
+  outfile << "  tg_par3->SetPoint (i, " << mass << ", " << f_doublePeakModel->GetParameter (3) << ") ;\n" ;
+  outfile << "  TF1 * func_" << mass << " = new TF1 (\"func_" << mass << "\",doublePeakModel, 200, 2000, 4) ;\n" ; 
+  outfile << "  double params_" << mass << "[4] = {" << f_doublePeakModel->GetParameter (0) << ", " << f_doublePeakModel->GetParameter (1) << ", " << f_doublePeakModel->GetParameter (2) << ", " << f_doublePeakModel->GetParameter (3) << " } ;\n" ;
+  outfile << "  func_" << mass << "->SetParameters (params_" << mass << ") ;\n" ; 
+  outfile << "  // signal only parametrisation:\n" ;
+  outfile << "  tg_sig_par0->SetPoint (i, " << mass << ", " << func_mg_1->GetParameter (0) << ") ;\n" ;
+  outfile << "  tg_sig_par1->SetPoint (i, " << mass << ", " << func_mg_1->GetParameter (1) << ") ;\n" ;
+  outfile << "  tg_sig_par2->SetPoint (i, " << mass << ", " << func_mg_1->GetParameter (2) << ") ;\n" ;
+  outfile << "  tg_sig_par3->SetPoint (i, " << mass << ", " << func_mg_1->GetParameter (3) << ") ;\n" ;
+  outfile << "  tg_sig_par4->SetPoint (i, " << mass << ", " << func_mg_1->GetParameter (4) << ") ;\n" ;
+  outfile << "  tg_sig_par5->SetPoint (i, " << mass << ", " << func_mg_1->GetParameter (5) << ") ;\n" ;
+  outfile << "  tg_sig_par6->SetPoint (i, " << mass << ", " << func_mg_1->GetParameter (6) << ") ;\n" ;
+  outfile << "  TF1 * func_sig_" << mass << " = new TF1 (\"func_sig_" << mass << "\",crystalBallLowHigh, 200, 2000, 7) ;\n" ; 
+  outfile << "  double params_sig_" << mass << "[7] = {" << func_mg_1->GetParameter (0) << ", " << func_mg_1->GetParameter (1) << ", " << func_mg_1->GetParameter (2) << ", " << func_mg_1->GetParameter (3) << ", " << func_mg_1->GetParameter (4) << ", " << func_mg_1->GetParameter (5) << ", " << func_mg_1->GetParameter (6)  << " } ;\n" ;
+  outfile << "  func_sig_" << mass << "->SetParameters (params_sig_" << mass << ") ;\n" ; 
+  outfile << "  i++ ;\n" ;
+
   outfile.close () ;
 
   return 0 ;
