@@ -390,7 +390,7 @@ int macro_findInterferece (string filename, double mass)
   TF1 * func_mg_1 = new TF1 ("func_mg_1", crystalBallLowHigh, 0, 2000, 7) ;
   func_mg_1->SetNpx (10000) ;
   func_mg_1->SetLineWidth (1) ;
-  func_mg_1->SetLineColor (kBlue + 2) ;
+  func_mg_1->SetLineColor (kBlue + 1) ;
 
   setParNamesdoubleGausCrystalBallLowHigh (func_mg_1) ;
   cout << "PREFIT RMS : " << h_MWW_mg->GetRMS () << endl ;
@@ -408,7 +408,14 @@ int macro_findInterferece (string filename, double mass)
 
   int sign = 1 ;
   if (mass < 400) sign = -2 ;
+  cout << "-------------------\nFITTING THE MADGRAPH SIGNAL\n" ;
   h_MWW_mg->Fit ("func_mg_1", "+", "", 0.5 * mass + sign * 50, 2 * mass) ;
+  cout << "CHI2 / NDOF = " << func_mg_1->GetChisquare () /func_mg_1->GetNDF () << endl ;
+  func_mg_1->SetParameters (func_mg_1->GetParameters ()) ;
+  func_mg_1->SetLineColor (kBlue + 3) ;
+  cout << "-------------------\nFITTING THE MADGRAPH SIGNAL W/ LIKELIHOOD\n" ;
+  h_MWW_mg->Fit ("func_mg_1", "+L", "", 0.5 * mass - 50, 2 * mass) ;
+  cout << "CHI2 / NDOF = " << func_mg_1->GetChisquare () /func_mg_1->GetNDF () << endl ;
 
   ymax = h_MWW_mg->GetBinContent (h_MWW_mg->GetMaximumBin ()) ;
   ymin = h_MWW_mg->GetBinContent (h_MWW_mg->GetMinimumBin ()) ;
@@ -419,9 +426,9 @@ int macro_findInterferece (string filename, double mass)
   h_MWW_mg->Draw ("EPsame") ;
 
   double rightTh = fabs (func_mg_1->GetParameter (3)) * func_mg_1->GetParameter (2) + func_mg_1->GetParameter (1) ;
-  cout << "RIGHT THRESHOLD " << rightTh << endl ;
+  cout << "MG RIGHT THRESHOLD " << rightTh << endl ;
   double leftTh  = -1 * fabs (func_mg_1->GetParameter (5)) * func_mg_1->GetParameter (2) + func_mg_1->GetParameter (1) ;
-  cout << "LEFT THRESHOLD " << rightTh << endl ;
+  cout << "MG LEFT THRESHOLD " << leftTh << endl ;
 
   TLine * l_rightTh = new TLine (rightTh, 0.9 * ymin, rightTh, 1.1 * ymax) ;
   l_rightTh->SetLineColor (kRed) ;
@@ -445,23 +452,32 @@ int macro_findInterferece (string filename, double mass)
   TF1 * func_ph_1 = new TF1 ("func_ph_1", crystalBallLowHigh, 0, 2000, 7) ;
   func_ph_1->SetNpx (10000) ;
   func_ph_1->SetLineWidth (1) ;
-  func_ph_1->SetLineColor (kRed + 2) ;
+  func_ph_1->SetLineColor (kRed + 1) ;
   
   setParNamesdoubleGausCrystalBallLowHigh (func_ph_1) ;
 
   func_ph_1->SetParameter (0, 1.) ;                      // multiplicative scale
   func_ph_1->SetParameter (1, mass) ;                    // mean
   func_ph_1->SetParameter (2, gauss->GetParameter (2)) ; // gaussian sigma
+//  func_ph_1->SetParLimits (2, 0.1 * gauss->GetParameter (2), 20 * gauss->GetParameter (2)) ;
   func_ph_1->SetParameter (3, 1) ;                       // right junction
-  func_ph_1->SetParameter (4, 2) ;                       // right power law order
+//  func_ph_1->SetParLimits (3, 0.1, 5) ;                  // right junction
+  func_ph_1->SetParameter (4, 1) ;                       // right power law order
   func_ph_1->SetParameter (5, 1) ;                       // left junction
-  func_ph_1->SetParameter (6, 2) ;                       // left power law order
+//  func_ph_1->SetParLimits (5, 0.1, 5) ;                  // left junction
+  func_ph_1->SetParameter (6, 1) ;                       // left power law order
 
-  diff->Fit ("func_ph_1", "Q", "", 0.5 * mass - 50, 2 * mass) ;
+  cout << "-------------------\nFITTING THE PHANTOM SIGNAL\n" ;
+  diff->Fit ("func_ph_1", "", "", 0.5 * mass - 50, 2 * mass) ;
+  cout << "CHI2 / NDOF = " << func_ph_1->GetChisquare () /func_ph_1->GetNDF () << endl ;
   func_ph_1->SetParameters (func_ph_1->GetParameters ()) ;
-  diff->Fit ("func_ph_1", "Q+L", "", 0.5 * mass - 50, 2 * mass) ;
+  func_ph_1->SetLineColor (kRed + 3) ;
+  cout << "-------------------\nFITTING THE PHANTOM SIGNAL W/ LIKELIHOOD\n" ;
+  diff->Fit ("func_ph_1", "+L", "", 0.5 * mass - 50, 2 * mass) ;
+  cout << "CHI2 / NDOF = " << func_ph_1->GetChisquare () /func_ph_1->GetNDF () << endl ;
 
   ymax = diff->GetBinContent (diff->GetMaximumBin ()) ;
+  ymax = max (ymax, func_ph_1->GetMaximum ()) ;
   ymin = diff->GetBinContent (diff->GetMinimumBin ()) ;
   ymin = max (ymin, -0.1 * ymax) ;
   TH1F * c4_ph_frame = (TH1F *) c4_ph->DrawFrame (200, 0.9 * ymin, rangeScale * mass, 1.1 * ymax) ;
@@ -469,6 +485,19 @@ int macro_findInterferece (string filename, double mass)
   c4_ph_frame->SetStats (0) ;
   c4_ph_frame->GetXaxis ()->SetTitle ("m_{WW} (GeV)") ;
   diff->Draw ("EPsame") ;
+
+  double rightTh_ph = fabs (func_ph_1->GetParameter (3)) * func_ph_1->GetParameter (2) + func_ph_1->GetParameter (1) ;
+  cout << "PH RIGHT THRESHOLD " << rightTh_ph << endl ;
+  double leftTh_ph  = -1 * fabs (func_ph_1->GetParameter (5)) * func_ph_1->GetParameter (2) + func_ph_1->GetParameter (1) ;
+  cout << "PH LEFT THRESHOLD " << leftTh_ph << endl ;
+
+  TLine * l_rightTh_ph = new TLine (rightTh_ph, 0.9 * ymin, rightTh_ph, 1.1 * ymax) ;
+  l_rightTh_ph->SetLineColor (kRed) ;
+  l_rightTh_ph->Draw ("same") ;
+  TLine * l_leftTh_ph = new TLine (leftTh_ph, 0.9 * ymin, leftTh_ph, 1.1 * ymax) ;
+  l_leftTh_ph->SetLineColor (kRed) ;
+  l_leftTh_ph->Draw ("same") ;
+
   c4_ph->Print (TString ("signals_ph") + suffix, "pdf") ;
 
   //PG (SBI - B) - S only ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -494,14 +523,16 @@ int macro_findInterferece (string filename, double mass)
   f_doublePeakModel->SetParName (2, "distance") ;
   f_doublePeakModel->SetParName (3, "gamma") ; 
 
-  f_doublePeakModel->SetParameter (0, 1.) ;   
+  f_doublePeakModel->SetParameter (0, -0.000001) ;   
   f_doublePeakModel->SetParameter (1, mass) ; 
-  f_doublePeakModel->SetParameter (2, fabs (func_ph_1->GetParameter (1) - func_mg_1->GetParameter (1))) ;  
+  f_doublePeakModel->SetParameter (2, -0.01) ;  
+//  f_doublePeakModel->SetParameter (2, fabs (func_ph_1->GetParameter (1) - func_mg_1->GetParameter (1))) ;  
   double aveWidth = 0.5 * sqrt (
       func_ph_1->GetParameter (2) * func_ph_1->GetParameter (2) +
       func_mg_1->GetParameter (2) * func_mg_1->GetParameter (2)  
     ) ;
-  f_doublePeakModel->SetParameter (3, 2 * aveWidth) ;  
+  f_doublePeakModel->SetParameter (3, mass * mass * 0.25 * 0.25) ;  
+//  f_doublePeakModel->SetParameter (3, 2 * aveWidth) ;  
   delta->Fit ("f_doublePeakModel", "+", "same", 0.5 * mass - 50, 2 * mass) ;
 
   delta->Draw ("histsame") ;
