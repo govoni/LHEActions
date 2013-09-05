@@ -88,7 +88,16 @@ int graphs ()
   TGraph * tg_sig_par5 = new TGraph (5) ;
   TGraph * tg_sig_par6 = new TGraph (5) ;
 
+  TGraph * tg_sAi_par0 = new TGraph (5) ;
+  TGraph * tg_sAi_par1 = new TGraph (5) ;
+  TGraph * tg_sAi_par2 = new TGraph (5) ;
+  TGraph * tg_sAi_par3 = new TGraph (5) ;
+  TGraph * tg_sAi_par4 = new TGraph (5) ;
+  TGraph * tg_sAi_par5 = new TGraph (5) ;
+  TGraph * tg_sAi_par6 = new TGraph (5) ;
+
   int i = 0 ; 
+  
   
   
   
@@ -102,7 +111,7 @@ int graphs ()
   TF1 * func_350 = new TF1 ("func_350",doublePeakModel, 200, 2000, 4) ;
   double params_350[4] = {-4.4362e-07, 349.521, -9.31673e-05, 660.315 } ;
   func_350->SetParameters (params_350) ;
-  // signal only parametrisation:
+  // MG signal only parametrisation:
   tg_sig_par0->SetPoint (i, 350, 0.00794395) ;
   tg_sig_par1->SetPoint (i, 350, 350.343) ;
   tg_sig_par2->SetPoint (i, 350, 7.63757) ;
@@ -113,6 +122,17 @@ int graphs ()
   TF1 * func_sig_350 = new TF1 ("func_sig_350",crystalBallLowHigh, 200, 2000, 7) ;
   double params_sig_350[7] = {0.00794395, 350.343, 7.63757, 1.15603, 1.55177, 1.26848, 2.15573 } ;
   func_sig_350->SetParameters (params_sig_350) ;
+  // PG SBI - B  parametrisation:
+  tg_sAi_par0->SetPoint (i, 350, 0.00788258) ;
+  tg_sAi_par1->SetPoint (i, 350, 349.87) ;
+  tg_sAi_par2->SetPoint (i, 350, -7.39483) ;
+  tg_sAi_par3->SetPoint (i, 350, 0.977129) ;
+  tg_sAi_par4->SetPoint (i, 350, 3.29112) ;
+  tg_sAi_par5->SetPoint (i, 350, 1.1835) ;
+  tg_sAi_par6->SetPoint (i, 350, 2.24637) ;
+  TF1 * func_sAi_350 = new TF1 ("func_sAi_350",crystalBallLowHigh, 200, 2000, 7) ;
+  double params_sAi_350[7] = {0.00788258, 349.87, -7.39483, 0.977129, 3.29112, 1.1835, 2.24637 } ;
+  func_sAi_350->SetParameters (params_sAi_350) ;
   i++ ;
   
   // ----> MASS 500 ---- ---- ---- 
@@ -125,7 +145,7 @@ int graphs ()
   TF1 * func_500 = new TF1 ("func_500",doublePeakModel, 200, 2000, 4) ;
   double params_500[4] = {-4.30542e-06, 488.467, -0.00537915, 9775.1 } ;
   func_500->SetParameters (params_500) ;
-  // signal only parametrisation:
+  // MG signal only parametrisation:
   tg_sig_par0->SetPoint (i, 500, 0.00142874) ;
   tg_sig_par1->SetPoint (i, 500, 503.368) ;
   tg_sig_par2->SetPoint (i, 500, 29.8165) ;
@@ -136,6 +156,17 @@ int graphs ()
   TF1 * func_sig_500 = new TF1 ("func_sig_500",crystalBallLowHigh, 200, 2000, 7) ;
   double params_sig_500[7] = {0.00142874, 503.368, 29.8165, 0.831729, 2.54529, 1.24525, 2.78472 } ;
   func_sig_500->SetParameters (params_sig_500) ;
+  // PG SBI - B  parametrisation:
+  tg_sAi_par0->SetPoint (i, 500, 0.00141459) ;
+  tg_sAi_par1->SetPoint (i, 500, 498.494) ;
+  tg_sAi_par2->SetPoint (i, 500, -22.661) ;
+  tg_sAi_par3->SetPoint (i, 500, 0.542412) ;
+  tg_sAi_par4->SetPoint (i, 500, 129.007) ;
+  tg_sAi_par5->SetPoint (i, 500, -0.723368) ;
+  tg_sAi_par6->SetPoint (i, 500, 6.30082) ;
+  TF1 * func_sAi_500 = new TF1 ("func_sAi_500",crystalBallLowHigh, 200, 2000, 7) ;
+  double params_sAi_500[7] = {0.00141459, 498.494, -22.661, 0.542412, 129.007, -0.723368, 6.30082 } ;
+  func_sAi_500->SetParameters (params_sAi_500) ;
   i++ ;
   
   // ----> MASS 650 ---- ---- ---- 
@@ -148,7 +179,7 @@ int graphs ()
   TF1 * func_650 = new TF1 ("func_650",doublePeakModel, 200, 2000, 4) ;
   double params_650[4] = {-2.15082e-06, 648.512, -0.00935512, 23441.2 } ;
   func_650->SetParameters (params_650) ;
-  // signal only parametrisation:
+  // MG signal only parametrisation:
   tg_sig_par0->SetPoint (i, 650, 0.000276903) ;
   tg_sig_par1->SetPoint (i, 650, 666.593) ;
   tg_sig_par2->SetPoint (i, 650, 79.0964) ;
@@ -159,6 +190,17 @@ int graphs ()
   TF1 * func_sig_650 = new TF1 ("func_sig_650",crystalBallLowHigh, 200, 2000, 7) ;
   double params_sig_650[7] = {0.000276903, 666.593, 79.0964, 1.53166, 1.69832, 1.57689, 2.16479 } ;
   func_sig_650->SetParameters (params_sig_650) ;
+  // PG SBI - B  parametrisation:
+  tg_sAi_par0->SetPoint (i, 650, 0.000298928) ;
+  tg_sAi_par1->SetPoint (i, 650, 642.738) ;
+  tg_sAi_par2->SetPoint (i, 650, -60.2691) ;
+  tg_sAi_par3->SetPoint (i, 650, 0.68857) ;
+  tg_sAi_par4->SetPoint (i, 650, 134.104) ;
+  tg_sAi_par5->SetPoint (i, 650, 1.06886) ;
+  tg_sAi_par6->SetPoint (i, 650, 45.3204) ;
+  TF1 * func_sAi_650 = new TF1 ("func_sAi_650",crystalBallLowHigh, 200, 2000, 7) ;
+  double params_sAi_650[7] = {0.000298928, 642.738, -60.2691, 0.68857, 134.104, 1.06886, 45.3204 } ;
+  func_sAi_650->SetParameters (params_sAi_650) ;
   i++ ;
   
   // ----> MASS 800 ---- ---- ---- 
@@ -171,7 +213,7 @@ int graphs ()
   TF1 * func_800 = new TF1 ("func_800",doublePeakModel, 200, 2000, 4) ;
   double params_800[4] = {-7.4816e-07, 759.208, 93.1791, 27559.3 } ;
   func_800->SetParameters (params_800) ;
-  // signal only parametrisation:
+  // MG signal only parametrisation:
   tg_sig_par0->SetPoint (i, 800, 8.16552e-05) ;
   tg_sig_par1->SetPoint (i, 800, 803.873) ;
   tg_sig_par2->SetPoint (i, 800, 127.14) ;
@@ -182,6 +224,17 @@ int graphs ()
   TF1 * func_sig_800 = new TF1 ("func_sig_800",crystalBallLowHigh, 200, 2000, 7) ;
   double params_sig_800[7] = {8.16552e-05, 803.873, 127.14, 1.63088, 1.77215, 1.58901, 3.80968 } ;
   func_sig_800->SetParameters (params_sig_800) ;
+  // PG SBI - B  parametrisation:
+  tg_sAi_par0->SetPoint (i, 800, 7.95686e-05) ;
+  tg_sAi_par1->SetPoint (i, 800, 731.24) ;
+  tg_sAi_par2->SetPoint (i, 800, -123.558) ;
+  tg_sAi_par3->SetPoint (i, 800, -284896) ;
+  tg_sAi_par4->SetPoint (i, 800, 0.96193) ;
+  tg_sAi_par5->SetPoint (i, 800, -1.83365) ;
+  tg_sAi_par6->SetPoint (i, 800, 7.6152) ;
+  TF1 * func_sAi_800 = new TF1 ("func_sAi_800",crystalBallLowHigh, 200, 2000, 7) ;
+  double params_sAi_800[7] = {7.95686e-05, 731.24, -123.558, -284896, 0.96193, -1.83365, 7.6152 } ;
+  func_sAi_800->SetParameters (params_sAi_800) ;
   i++ ;
   
   // ----> MASS 1000 ---- ---- ---- 
@@ -194,7 +247,7 @@ int graphs ()
   TF1 * func_1000 = new TF1 ("func_1000",doublePeakModel, 200, 2000, 4) ;
   double params_1000[4] = {-1.98075e-06, 797.034, 211.982, 50378 } ;
   func_1000->SetParameters (params_1000) ;
-  // signal only parametrisation:
+  // MG signal only parametrisation:
   tg_sig_par0->SetPoint (i, 1000, 6.33517e-05) ;
   tg_sig_par1->SetPoint (i, 1000, 937.791) ;
   tg_sig_par2->SetPoint (i, 1000, 229.464) ;
@@ -205,6 +258,17 @@ int graphs ()
   TF1 * func_sig_1000 = new TF1 ("func_sig_1000",crystalBallLowHigh, 200, 2000, 7) ;
   double params_sig_1000[7] = {6.33517e-05, 937.791, 229.464, 1.786, 2.05718, 1.84084, 28.6439 } ;
   func_sig_1000->SetParameters (params_sig_1000) ;
+  // PG SBI - B  parametrisation:
+  tg_sAi_par0->SetPoint (i, 1000, 5.013e-05) ;
+  tg_sAi_par1->SetPoint (i, 1000, 745.865) ;
+  tg_sAi_par2->SetPoint (i, 1000, -221.055) ;
+  tg_sAi_par3->SetPoint (i, 1000, 1.55364) ;
+  tg_sAi_par4->SetPoint (i, 1000, -0.104939) ;
+  tg_sAi_par5->SetPoint (i, 1000, 2.22004) ;
+  tg_sAi_par6->SetPoint (i, 1000, 2.89184) ;
+  TF1 * func_sAi_1000 = new TF1 ("func_sAi_1000",crystalBallLowHigh, 200, 2000, 7) ;
+  double params_sAi_1000[7] = {5.013e-05, 745.865, -221.055, 1.55364, -0.104939, 2.22004, 2.89184 } ;
+  func_sAi_1000->SetParameters (params_sAi_1000) ;
   i++ ;
 
 
@@ -245,6 +309,17 @@ int graphs ()
   c_sig_par->cd (++i) ; tg_sig_par5->Draw ("AL*") ;
   c_sig_par->cd (++i) ; tg_sig_par6->Draw ("AL*") ;
 
+  TCanvas * c_sAi_par = new TCanvas () ;
+  c_sAi_par->Divide (3,2) ;
+  i = 0 ;
+  c_sAi_par->cd (++i) ; tg_sAi_par0->SetLineColor (kRed) ; tg_sAi_par0->Draw ("AL*") ; 
+  c_sAi_par->cd (++i) ; tg_sAi_par1->SetLineColor (kRed) ; tg_sAi_par1->Draw ("AL*") ;
+  c_sAi_par->cd (++i) ; tg_sAi_par2->SetLineColor (kRed) ; tg_sAi_par2->Draw ("AL*") ;
+  c_sAi_par->cd (++i) ; tg_sAi_par3->SetLineColor (kRed) ; tg_sAi_par3->Draw ("AL*") ;
+  c_sAi_par->cd (++i) ; tg_sAi_par4->SetLineColor (kRed) ; tg_sAi_par4->Draw ("AL*") ;
+  c_sAi_par->cd (++i) ; tg_sAi_par5->SetLineColor (kRed) ; tg_sAi_par5->Draw ("AL*") ;
+  c_sAi_par->cd (++i) ; tg_sAi_par6->SetLineColor (kRed) ; tg_sAi_par6->Draw ("AL*") ;
+
   TCanvas * c_results = new TCanvas ("c_results", "c_results", 5000, 600) ;
   c_results->Divide (5,2) ;
 
@@ -269,6 +344,10 @@ int graphs ()
   func_sig_350->SetLineWidth (1) ;
   func_sig_350->SetNpx (10000) ;
   func_sig_350->Draw ("same") ;
+  func_sAi_350->SetLineWidth (1) ;
+  func_sAi_350->SetLineColor (kRed) ;
+  func_sAi_350->SetNpx (10000) ;
+  func_sAi_350->Draw ("same") ;
   func_350->SetLineWidth (1) ;
   func_350->SetNpx (10000) ;
   func_350->Draw ("same") ;
@@ -297,6 +376,10 @@ int graphs ()
   func_sig_500->SetLineWidth (1) ;
   func_sig_500->SetNpx (10000) ;
   func_sig_500->Draw ("same") ;
+  func_sAi_500->SetLineWidth (1) ;
+  func_sAi_500->SetLineColor (kRed) ;
+  func_sAi_500->SetNpx (10000) ;
+  func_sAi_500->Draw ("same") ;
   func_500->SetLineWidth (1) ;
   func_500->SetNpx (10000) ;
   func_500->Draw ("same") ;
@@ -325,6 +408,10 @@ int graphs ()
   func_sig_650->SetLineWidth (1) ;
   func_sig_650->SetNpx (10000) ;
   func_sig_650->Draw ("same") ;
+  func_sAi_650->SetLineWidth (1) ;
+  func_sAi_650->SetLineColor (kRed) ;
+  func_sAi_650->SetNpx (10000) ;
+  func_sAi_650->Draw ("same") ;
   func_650->SetLineWidth (1) ;
   func_650->SetNpx (10000) ;
   func_650->Draw ("same") ;
@@ -353,6 +440,10 @@ int graphs ()
   func_sig_800->SetLineWidth (1) ;
   func_sig_800->SetNpx (10000) ;
   func_sig_800->Draw ("same") ;
+  func_sAi_800->SetLineWidth (1) ;
+  func_sAi_800->SetLineColor (kRed) ;
+  func_sAi_800->SetNpx (10000) ;
+  func_sAi_800->Draw ("same") ;
   func_800->SetLineWidth (1) ;
   func_800->SetNpx (10000) ;
   func_800->Draw ("same") ;
@@ -381,6 +472,10 @@ int graphs ()
   func_sig_1000->SetLineWidth (1) ;
   func_sig_1000->SetNpx (10000) ;
   func_sig_1000->Draw ("same") ;
+  func_sAi_1000->SetLineWidth (1) ;
+  func_sAi_1000->SetLineColor (kRed) ;
+  func_sAi_1000->SetNpx (10000) ;
+  func_sAi_1000->Draw ("same") ;
   func_1000->SetLineWidth (1) ;
   func_1000->SetNpx (10000) ;
   func_1000->Draw ("same") ;
@@ -393,8 +488,8 @@ int graphs ()
 
 
 
-  TCanvas * test = new TCanvas () ;
-  f_IOS_350->Draw () ;
+//  TCanvas * test = new TCanvas () ;
+//  f_IOS_350->Draw () ;
 //  func_sig_350->Draw () ;
 //  func_350->Draw ("same") ;
 

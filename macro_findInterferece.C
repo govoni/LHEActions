@@ -7,6 +7,13 @@ r00t -q macro_findInterferece.C\(\"findInterference.1000.root\",1000\)
 */
 
 
+double max (double one, double two)
+{
+  if (one > two) return one ;
+  return two ;
+}
+
+
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
 
@@ -79,9 +86,9 @@ void setParNamesdoubleGausCrystalBallLowHigh (TF1 * func)
 {
   func->SetParName (1, "mean") ;
   func->SetParName (2, "sigma") ;
-  func->SetParName (3, "alphaL") ;
+  func->SetParName (3, "alphaR") ;
   func->SetParName (4, "nL") ;
-  func->SetParName (5, "alphaR") ;
+  func->SetParName (5, "alphaL") ;
   func->SetParName (6, "nR") ;
   return ;
 }  
@@ -386,18 +393,22 @@ int macro_findInterferece (string filename, double mass)
   func_mg_1->SetLineColor (kBlue + 2) ;
 
   setParNamesdoubleGausCrystalBallLowHigh (func_mg_1) ;
+  cout << "PREFIT RMS : " << h_MWW_mg->GetRMS () << endl ;
 
   func_mg_1->SetParameter (0, 1.) ;                  // multiplicative scale
   func_mg_1->SetParameter (1, mass) ;                // mean
   func_mg_1->SetParameter (2, h_MWW_mg->GetRMS ()) ; // gaussian sigma
+  func_mg_1->SetParLimits (2, 0.1 * h_MWW_mg->GetRMS (), 20 * h_MWW_mg->GetRMS ()) ;
   func_mg_1->SetParameter (3, 1) ;                   // right junction
+  func_mg_1->SetParLimits (3, 0.1, 5) ;              // right junction
   func_mg_1->SetParameter (4, 1) ;                   // right power law order
   func_mg_1->SetParameter (5, 1) ;                   // left junction
+  func_mg_1->SetParLimits (5, 0.1, 5) ;              // left junction
   func_mg_1->SetParameter (6, 1) ;                   // left power law order
 
   int sign = 1 ;
-  if (mass < 400) sign = -1 ;
-  h_MWW_mg->Fit ("func_mg_1", "Q+", "", 0.5 * mass + sign * 50, 2 * mass) ;
+  if (mass < 400) sign = -2 ;
+  h_MWW_mg->Fit ("func_mg_1", "+", "", 0.5 * mass + sign * 50, 2 * mass) ;
 
   ymax = h_MWW_mg->GetBinContent (h_MWW_mg->GetMaximumBin ()) ;
   ymin = h_MWW_mg->GetBinContent (h_MWW_mg->GetMinimumBin ()) ;
@@ -406,6 +417,18 @@ int macro_findInterferece (string filename, double mass)
   c4_mg_frame->SetStats (0) ;
   c4_mg_frame->GetXaxis ()->SetTitle ("m_{WW} (GeV)") ;
   h_MWW_mg->Draw ("EPsame") ;
+
+  double rightTh = fabs (func_mg_1->GetParameter (3)) * func_mg_1->GetParameter (2) + func_mg_1->GetParameter (1) ;
+  cout << "RIGHT THRESHOLD " << rightTh << endl ;
+  double leftTh  = -1 * fabs (func_mg_1->GetParameter (5)) * func_mg_1->GetParameter (2) + func_mg_1->GetParameter (1) ;
+  cout << "LEFT THRESHOLD " << rightTh << endl ;
+
+  TLine * l_rightTh = new TLine (rightTh, 0.9 * ymin, rightTh, 1.1 * ymax) ;
+  l_rightTh->SetLineColor (kRed) ;
+  l_rightTh->Draw ("same") ;
+  TLine * l_leftTh = new TLine (leftTh, 0.9 * ymin, leftTh, 1.1 * ymax) ;
+  l_leftTh->SetLineColor (kRed) ;
+  l_leftTh->Draw ("same") ;
 
   c4_mg->Update () ;
   c4_mg->Print (TString ("signals_mg") + suffix, "pdf") ;
@@ -440,6 +463,7 @@ int macro_findInterferece (string filename, double mass)
 
   ymax = diff->GetBinContent (diff->GetMaximumBin ()) ;
   ymin = diff->GetBinContent (diff->GetMinimumBin ()) ;
+  ymin = max (ymin, -0.1 * ymax) ;
   TH1F * c4_ph_frame = (TH1F *) c4_ph->DrawFrame (200, 0.9 * ymin, rangeScale * mass, 1.1 * ymax) ;
   c4_ph_frame->SetTitle (0) ;
   c4_ph_frame->SetStats (0) ;
@@ -460,7 +484,6 @@ int macro_findInterferece (string filename, double mass)
   c3_frame->SetStats (0) ;
   c3_frame->GetXaxis ()->SetTitle ("m_{WW} (GeV)") ;
 
-
   TF1 * f_doublePeakModel = new TF1 ("f_doublePeakModel", doublePeakModel, 0, 2000, 4) ;
   f_doublePeakModel->SetNpx (10000) ;
   f_doublePeakModel->SetLineWidth (1) ;
@@ -480,50 +503,6 @@ int macro_findInterferece (string filename, double mass)
     ) ;
   f_doublePeakModel->SetParameter (3, 2 * aveWidth) ;  
   delta->Fit ("f_doublePeakModel", "+", "same", 0.5 * mass - 50, 2 * mass) ;
-
-//  TF1 * func3 = new TF1 ("func3", doubleSlope, 0, 2000, 5) ;
-//  func3->SetNpx (10000) ;
-//  func3->SetLineWidth (1) ;
-//  func3->SetLineColor (kGray + 2) ;
-//
-//  func3->SetParName (0, "centre") ;
-//  func3->SetParName (1, "shift") ;
-//  func3->SetParName (2, "scale") ;
-//  func3->SetParName (3, "slope_right") ;
-//  func3->SetParName (4, "slope_left") ;
-//
-//  //PG first fit, get the slope at the right with the mass hypothesis
-//  func3->FixParameter (0, mass) ;
-//  func3->FixParameter (1, 0.) ;
-//  func3->SetParameter (2, 0.0005) ;
-//  func3->SetParameter (3, 0.05) ;
-//  func3->SetParameter (4, 0.05) ;
-//  delta->Fit ("func3", "+", "same", mass, 2 * mass) ;
-//
-//  //PG second fit, get the centre given the slope
-//  func3->SetParLimits (0, mass - sqrt (mass), mass + sqrt (mass)) ;
-//  func3->FixParameter (1, 0.) ;
-//  func3->SetParameter (2, 0.0005) ;
-//  func3->FixParameter (3, func3->GetParameter (3)) ;
-//  func3->SetParameter (4, 0.05) ;
-//  delta->Fit ("func3", "+", "same", 0.5 * mass - 50, 2 * mass) ;
-//
-//  TF1 * func3_1 = new TF1 ("func3_1", singleSlope, 0, 2000, 5) ;
-//  func3_1->SetNpx (10000) ;
-//  func3_1->SetLineWidth (1) ;
-//  func3_1->SetLineColor (kGreen + 2) ;
-//  func3_1->SetParName (0, "centre") ;
-//  func3_1->SetParName (1, "shift") ;
-//  func3_1->SetParName (2, "scale") ;
-//  func3_1->SetParName (3, "slope") ;
-//
-//  //PG third fit, fix centre and slope and get the rest
-//  func3_1->SetParameter (0, func3->GetParameter (0)) ;
-//  func3_1->FixParameter (1, 0.) ;
-//  func3_1->SetParameter (2, 0.0005) ;
-//  func3_1->FixParameter (3, func3->GetParameter (3)) ;
-//
-//  delta->Fit ("func3_1", "+", "same", 0.7 * mass, 2 * mass) ;
 
   delta->Draw ("histsame") ;
   c3_leg = new TLegend (0.5,0.8,0.9,0.95) ;
@@ -580,7 +559,7 @@ int macro_findInterferece (string filename, double mass)
   outfile << "  TF1 * func_" << mass << " = new TF1 (\"func_" << mass << "\",doublePeakModel, 200, 2000, 4) ;\n" ; 
   outfile << "  double params_" << mass << "[4] = {" << f_doublePeakModel->GetParameter (0) << ", " << f_doublePeakModel->GetParameter (1) << ", " << f_doublePeakModel->GetParameter (2) << ", " << f_doublePeakModel->GetParameter (3) << " } ;\n" ;
   outfile << "  func_" << mass << "->SetParameters (params_" << mass << ") ;\n" ; 
-  outfile << "  // signal only parametrisation:\n" ;
+  outfile << "  // MG signal only parametrisation:\n" ;
   outfile << "  tg_sig_par0->SetPoint (i, " << mass << ", " << func_mg_1->GetParameter (0) << ") ;\n" ;
   outfile << "  tg_sig_par1->SetPoint (i, " << mass << ", " << func_mg_1->GetParameter (1) << ") ;\n" ;
   outfile << "  tg_sig_par2->SetPoint (i, " << mass << ", " << func_mg_1->GetParameter (2) << ") ;\n" ;
@@ -591,208 +570,22 @@ int macro_findInterferece (string filename, double mass)
   outfile << "  TF1 * func_sig_" << mass << " = new TF1 (\"func_sig_" << mass << "\",crystalBallLowHigh, 200, 2000, 7) ;\n" ; 
   outfile << "  double params_sig_" << mass << "[7] = {" << func_mg_1->GetParameter (0) << ", " << func_mg_1->GetParameter (1) << ", " << func_mg_1->GetParameter (2) << ", " << func_mg_1->GetParameter (3) << ", " << func_mg_1->GetParameter (4) << ", " << func_mg_1->GetParameter (5) << ", " << func_mg_1->GetParameter (6)  << " } ;\n" ;
   outfile << "  func_sig_" << mass << "->SetParameters (params_sig_" << mass << ") ;\n" ; 
+  outfile << "  // PG SBI - B  parametrisation:\n" ;
+  outfile << "  tg_sAi_par0->SetPoint (i, " << mass << ", " << func_ph_1->GetParameter (0) << ") ;\n" ;
+  outfile << "  tg_sAi_par1->SetPoint (i, " << mass << ", " << func_ph_1->GetParameter (1) << ") ;\n" ;
+  outfile << "  tg_sAi_par2->SetPoint (i, " << mass << ", " << func_ph_1->GetParameter (2) << ") ;\n" ;
+  outfile << "  tg_sAi_par3->SetPoint (i, " << mass << ", " << func_ph_1->GetParameter (3) << ") ;\n" ;
+  outfile << "  tg_sAi_par4->SetPoint (i, " << mass << ", " << func_ph_1->GetParameter (4) << ") ;\n" ;
+  outfile << "  tg_sAi_par5->SetPoint (i, " << mass << ", " << func_ph_1->GetParameter (5) << ") ;\n" ;
+  outfile << "  tg_sAi_par6->SetPoint (i, " << mass << ", " << func_ph_1->GetParameter (6) << ") ;\n" ;
+  outfile << "  TF1 * func_sAi_" << mass << " = new TF1 (\"func_sAi_" << mass << "\",crystalBallLowHigh, 200, 2000, 7) ;\n" ; 
+  outfile << "  double params_sAi_" << mass << "[7] = {" << func_ph_1->GetParameter (0) << ", " << func_ph_1->GetParameter (1) << ", " << func_ph_1->GetParameter (2) << ", " << func_ph_1->GetParameter (3) << ", " << func_ph_1->GetParameter (4) << ", " << func_ph_1->GetParameter (5) << ", " << func_ph_1->GetParameter (6)  << " } ;\n" ;
+  outfile << "  func_sAi_" << mass << "->SetParameters (params_sAi_" << mass << ") ;\n" ; 
   outfile << "  i++ ;\n" ;
 
   outfile.close () ;
 
   return 0 ;
-
-
-// ===============================================================================
-// ===============================================================================
-// ===============================================================================
-// ===============================================================================
-
-
-
-
-
-
-//PG (SBI - B) - S and the two signals
-
-  TCanvas * c5_1 = new TCanvas () ;
-
-  TF1 * f_relRatio = new TF1 ("f_relRatio", relativeCrystalBallLowHighRatio, 0, 2000, 14);
-  f_relRatio->SetLineWidth (3) ;
-  f_relRatio->SetLineColor (kGray + 2) ;
-  Double_t f_ratio_pars [14] ;
-  f_relRatio->SetParameters (f_ratio_pars) ;
-
-  TH1F * relInterf = (TH1F *) delta->Clone ("relInterf") ;
-  relInterf->Divide (h_MWW_mg) ;
-  relInterf->Draw ("EP") ;
-  f_relRatio->Draw ("same") ;
-  
-  c5_1->Print ("relRatio.pdf", "pdf") ;
-
-
-
-  //PG (SBI - B) - S and S
-
-  TCanvas * c5 = new TCanvas () ;
-//  h_MWW_mg->Draw ("histsame") ;
-
-  TF1 * retta = new TF1 ("retta", "pol1", 0, 2000) ;
-  retta->SetLineWidth (1) ;
-  retta->SetLineColor (kPink) ;
-  delta->Fit ("retta", "Q+", "", mass - 30, mass + 30) ;
-
-//  TF1 * expo = new TF1 ("expo", "-1 * exp ([0] * sqrt (fabs (x - [1])))", 0, 2000) ;
-  TF1 * expo = new TF1 ("expo", "-1 * exp ([0] * fabs (x - [1]))", 0, 2000) ;
-  expo->SetLineWidth (1) ;
-  expo->SetLineColor (kPink) ;
-  expo->FixParameter (1, mass) ;
-//  expo->SetParameter (0, - 0.04) ;
-
-  delta->Fit ("expo", "Q+", "", mass + 50, 2000) ;
-  
-  TF1 * func2 = new TF1 ("func2","-1 * [2] * (x - [0]) * exp (-1 * [3] * abs (x - [0])) + [1]",0, 2000) ;
-
-  func2->SetLineWidth (1) ;
-  func2->SetLineColor (kBlue) ;
-
-  func2->FixParameter (0, mass) ;
-  func2->FixParameter (1, 0.) ;
-
-  func2->SetParameter (2, retta->GetParameter (1)) ;
-  func2->SetParameter (3, expo->GetParameter (0)) ;
-
-//  delta->Fit ("func2", "+", "", 600, 2000) ;
-//  expo->Draw ("same") ;
-
-  c5->Print ("delta.pdf", "pdf") ;
-  expo->Draw ("same") ;
-
-
-  //PG S / (SBI - S)
-
-  TF1 * f_ratio = new TF1 ("f_ratio", crystalBallLowHighRatio, 0, 2000, 14);
-  f_ratio->SetLineWidth (3) ;
-  f_ratio->SetLineColor (kGray + 2) ;
-  Double_t f_ratio_pars [14] ;
-  func_ph_1->GetParameters (f_ratio_pars) ;
-  func_mg_1->GetParameters (f_ratio_pars + 7) ;
-  f_ratio->SetParameters (f_ratio_pars) ;
-
-  TCanvas * c3 = new TCanvas ("c3") ;
-  c3->DrawFrame (200, -0.4, rangeScale * mass, 12) ;
-  ratio->SetTitle ("") ;
-  ratio->SetLineColor (kMagenta) ;
-  ratio->GetXaxis ()->SetTitle ("mWW") ;
-  ratio->GetYaxis ()->SetTitle ("(SBI - B) / S") ;
-  ratio->Draw ("EPsame") ;
-  f_ratio->Draw ("same") ;
-  c3->Print ("ratio.pdf", "pdf") ;
-
-  cout << "mass " << mass << "\n" ;
-  cout << "fitting results:\n-----------------\n" ;
-  cout << "S: \n" ;
-  printArray (func_ph_1->GetParameters (), 7) ;
-  cout << "SBI - B: \n" ;
-  printArray (func_mg_1->GetParameters (), 7) ;
-
-  
-  return 0 ; //PG FIXME
-
-
-
-
-
-  TF1 * func3 = new TF1 ("func3", doubleSlope, 0, 2000, 5) ;
-  func3->SetLineWidth (3) ;
-  func3->SetLineColor (kGreen + 4) ;
-  func3->FixParameter (0, mass) ;
-  func3->FixParameter (1, 0.) ;
-
-  func3->SetParameter (2, 0.0005) ;
-  func3->SetParameter (3, 0.05) ;
-  func3->SetParameter (4, 0.05) ;
-
-  func3->SetParName (0, "centre") ;
-  func3->SetParName (1, "shift") ;
-  func3->SetParName (2, "scale") ;
-  func3->SetParName (3, "slope_right") ;
-  func3->SetParName (4, "slope_left") ;
-
-  delta->Fit ("func3", "Q+", "", 0, 650) ;
-
-  TF1 * func4 = new TF1 ("func4", parabolicAndExp, 0, 2000, 5) ;
-  func4->SetLineWidth (1) ;
-  func4->SetLineColor (kRed + 2) ;
-  func4->FixParameter (0, mass) ;
-  func4->FixParameter (1, 0.) ;
-
-  func4->FixParameter (2, func3->GetParameter (2)) ;
-  func4->FixParameter (3, func3->GetParameter (3)) ;
-  func4->SetParameter (4, 1) ;
-
-  func4->SetParName (0, "centre") ;
-  func4->SetParName (1, "shift") ;
-  func4->SetParName (2, "scale") ;
-  func4->SetParName (3, "slope_right") ;
-  func4->SetParName (4, "power_left") ;
-
-  delta->Fit ("func4", "+Q", "", 200, 2000) ;
-
-//  TF1 * func5 = new TF1 ("func5", sinusAndExp, 0, 2000, 5) ;
-//  func5->SetLineWidth (1) ;
-//  func5->SetLineColor (kRed + 2) ;
-//  func5->FixParameter (0, mass) ;
-//  func5->FixParameter (1, 0.) ;
-//
-//  func5->FixParameter (2, func3->GetParameter (2)) ;
-//  func5->FixParameter (3, func3->GetParameter (3)) ;
-//  func5->SetParameter (4, 10) ;
-//
-//  func5->SetParName (0, "centre") ;
-//  func5->SetParName (1, "shift") ;
-//  func5->SetParName (2, "scale") ;
-//  func5->SetParName (3, "slope_right") ;
-//  func5->SetParName (4, "freq_left") ;
-//
-//  delta->Fit ("func5", "+", "", 200, 2000) ;
-
-//  TF1 * func6 = new TF1 ("func6", withLeftAddOn, 0, 2000, 6) ;
-//  func6->SetLineWidth (1) ;
-//  func6->SetLineColor (kBlue + 2) ;
-//  func6->FixParameter (0, mass) ;
-//  func6->FixParameter (1, 0.) ;
-//
-//  func6->FixParameter (2, func3->GetParameter (2)) ;
-//  func6->FixParameter (3, func3->GetParameter (3)) ;
-//
-//  func6->SetParName (0, "centre") ;
-//  func6->SetParName (1, "shift") ;
-//  func6->SetParName (2, "scale") ;
-//  func6->SetParName (3, "slope") ;
-//  func6->SetParName (4, "secondCentre") ;
-//  func6->SetParName (5, "secondSlope") ;
-//
-//  delta->Fit ("func6", "+", "", 200, 2000) ;
-
-  TF1 * func7 = new TF1 ("func7", cubicAndExp, 0, 2000, 6) ;
-  func7->SetLineWidth (1) ;
-  func7->SetLineColor (kViolet + 2) ;
-  func7->FixParameter (0, mass) ;
-  func7->FixParameter (1, 0.) ;
-
-  func7->FixParameter (2, func3->GetParameter (2)) ;
-  func7->FixParameter (3, func3->GetParameter (3)) ;
-  func7->SetParameter (4, 1) ;
-
-  func7->SetParName (0, "centre") ;
-  func7->SetParName (1, "shift") ;
-  func7->SetParName (2, "scale") ;
-  func7->SetParName (3, "slope_right") ;
-  func7->SetParName (4, "power_left") ;
-
-  delta->Fit ("func7", "+Q", "", 200, 2000) ;
-
-
-  TCanvas * c6 = new TCanvas () ;
-  relDiff->Draw ("hist") ;
-
-  c6->Print ("relDiff.pdf", "pdf") ;
 
 
 }                                                                                   
