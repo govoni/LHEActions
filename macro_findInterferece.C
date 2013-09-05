@@ -273,6 +273,7 @@ int findBin (TH1F * h, double val)
 int macro_findInterferece (string filename, double mass)                                                        
 {        
 
+//  TVirtualFitter::SetDefaultFitter ("Minuit2") ;
   gSystem->Load ("Functions.cc") ;
   gStyle->SetPadTopMargin (0.1) ;
 
@@ -399,12 +400,12 @@ int macro_findInterferece (string filename, double mass)
   func_mg_1->SetParameter (1, mass) ;                // mean
   func_mg_1->SetParameter (2, h_MWW_mg->GetRMS ()) ; // gaussian sigma
   func_mg_1->SetParLimits (2, 0.1 * h_MWW_mg->GetRMS (), 20 * h_MWW_mg->GetRMS ()) ;
-  func_mg_1->SetParameter (3, 1) ;                   // right junction
-  func_mg_1->SetParLimits (3, 0.1, 5) ;              // right junction
-  func_mg_1->SetParameter (4, 1) ;                   // right power law order
-  func_mg_1->SetParameter (5, 1) ;                   // left junction
-  func_mg_1->SetParLimits (5, 0.1, 5) ;              // left junction
-  func_mg_1->SetParameter (6, 1) ;                   // left power law order
+  func_mg_1->SetParameter (3, 1.5) ;                   // right junction
+//  func_mg_1->SetParLimits (3, 0.1, 5) ;              // right junction
+  func_mg_1->SetParameter (4, 2) ;                   // right power law order
+  func_mg_1->SetParameter (5, 0.8) ;                   // left junction
+//  func_mg_1->SeaParLimits (5, 0.1, 5) ;              // left junction
+  func_mg_1->SetParameter (6, 2.38) ;                // left power law order
 
   int sign = 1 ;
   if (mass < 400) sign = -2 ;
@@ -461,11 +462,14 @@ int macro_findInterferece (string filename, double mass)
   func_ph_1->SetParameter (2, gauss->GetParameter (2)) ; // gaussian sigma
 //  func_ph_1->SetParLimits (2, 0.1 * gauss->GetParameter (2), 20 * gauss->GetParameter (2)) ;
   func_ph_1->SetParameter (3, 1) ;                       // right junction
-//  func_ph_1->SetParLimits (3, 0.1, 5) ;                  // right junction
-  func_ph_1->SetParameter (4, 1) ;                       // right power law order
+  func_ph_1->SetParLimits (3, 0.1, 5) ;                  // right junction
+  func_ph_1->FixParameter (4, 3) ;                       // right power law order            //PG NB THIS IS FIXED
+//  func_ph_1->SetParLimits (4, 0.1, 3) ;                  // left junction
   func_ph_1->SetParameter (5, 1) ;                       // left junction
+  func_ph_1->FixParameter (5, 1) ;                       // left junction                    //PG NB THIS IS FIXED
 //  func_ph_1->SetParLimits (5, 0.1, 5) ;                  // left junction
-  func_ph_1->SetParameter (6, 1) ;                       // left power law order
+  func_ph_1->FixParameter (6, 3) ;                       // left power law order             //PG NB THIS IS FIXED
+//  func_ph_1->SetParLimits (6, 0.1, 3) ;                  // left junction
 
   cout << "-------------------\nFITTING THE PHANTOM SIGNAL\n" ;
   diff->Fit ("func_ph_1", "", "", 0.5 * mass - 50, 2 * mass) ;
@@ -473,7 +477,9 @@ int macro_findInterferece (string filename, double mass)
   func_ph_1->SetParameters (func_ph_1->GetParameters ()) ;
   func_ph_1->SetLineColor (kRed + 3) ;
   cout << "-------------------\nFITTING THE PHANTOM SIGNAL W/ LIKELIHOOD\n" ;
-  diff->Fit ("func_ph_1", "+L", "", 0.5 * mass - 50, 2 * mass) ;
+  diff->Fit ("func_ph_1", "+L", "", 0.5 * mass - 50, 1.5 * mass) ;
+//  func_ph_1->SetParameters (func_ph_1->GetParameters ()) ;
+//  diff->Fit ("func_ph_1", "+L", "", 0.5 * mass - 50, 1.5 * mass) ;
   cout << "CHI2 / NDOF = " << func_ph_1->GetChisquare () /func_ph_1->GetNDF () << endl ;
 
   ymax = diff->GetBinContent (diff->GetMaximumBin ()) ;
@@ -523,9 +529,11 @@ int macro_findInterferece (string filename, double mass)
   f_doublePeakModel->SetParName (2, "distance") ;
   f_doublePeakModel->SetParName (3, "gamma") ; 
 
-  f_doublePeakModel->SetParameter (0, -0.000001) ;   
+//  f_doublePeakModel->SetParameter (0, -0.000002) ;   
+  f_doublePeakModel->FixParameter (0, -0.000002) ;    //PG NB IT'S FIXED
   f_doublePeakModel->SetParameter (1, mass) ; 
-  f_doublePeakModel->SetParameter (2, -0.01) ;  
+  f_doublePeakModel->FixParameter (2, -0.002) ;    //PG NB IT'S FIXED
+//  f_doublePeakModel->SetParameter (2, -0.002) ;  
 //  f_doublePeakModel->SetParameter (2, fabs (func_ph_1->GetParameter (1) - func_mg_1->GetParameter (1))) ;  
   double aveWidth = 0.5 * sqrt (
       func_ph_1->GetParameter (2) * func_ph_1->GetParameter (2) +
