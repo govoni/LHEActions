@@ -334,24 +334,45 @@ int graphs ()
   tg_sAi_par6->GetYaxis ()->SetTitle ("left power law") ;
 
   TCanvas * c_par = new TCanvas () ;
+  TF1 * sigmoid = new TF1 ("sigmoid", "[2] + [0] / (1.0 + TMath::Exp(-[1] * (x - [3])))") ;
+  sigmoid->SetParameter (0, 25000) ;
+  sigmoid->SetParameter (1, 0.005) ;
+  sigmoid->SetParameter (2, 30000) ;
+  sigmoid->SetParameter (3, 700) ;
+
   c_par->Divide (2,2) ;
   i = 0 ;
+  double x, y ;
+  cout << "---> INTERF PARAM 0\n" ;
+  tg_par0->GetPoint (1, x, y) ;
+  cout << y << endl ;
   c_par->cd (++i) ; tg_par0->Draw ("AL*") ; 
-  c_par->cd (++i) ; tg_par1->Draw ("AL*") ; // tg_mass->Draw ("L") ;
-  c_par->cd (++i) ; tg_par2->Draw ("AL*") ; // tg_width->Draw ("L") ;
-  c_par->cd (++i) ; tg_par3->Draw ("AL*") ; // tg_width->Draw ("L") ;
+  cout << "---> INTERF PARAM 1\n" ;
+  c_par->cd (++i) ; tg_par1->Draw ("AL*") ; tg_par1->Fit ("pol2") ;
+  cout << "---> INTERF PARAM 2\n" ;
+  tg_par2->GetPoint (1, x, y) ;
+  cout << y << endl ;
+  c_par->cd (++i) ; tg_par2->Draw ("AL*") ; 
+  cout << "---> INTERF PARAM 3\n" ;
+  c_par->cd (++i) ; tg_par3->Draw ("AL*") ; tg_par3->Fit (sigmoid) ;
+ 
   
   TCanvas * c_sig_par = new TCanvas ("c_sig_par", "c_sig_par", 4000, 600) ;
   c_sig_par->Divide (4,2) ;
   i = 0 ;
-  c_sig_par->cd (++i) ; tg_sig_par0->Draw ("AL*") ; 
-  c_sig_par->cd (++i) ; tg_sig_par1->Draw ("AL*") ;
-  c_sig_par->cd (++i) ; tg_sig_par2->Draw ("AL*") ;
+  cout << "---> SIGNAL PARAM 0\n" ;
+  c_sig_par->cd (++i) ; tg_sig_par0->Draw ("AL*") ; tg_sig_par0->Fit ("expo") ;
+  cout << "---> SIGNAL PARAM 1\n" ;
+  c_sig_par->cd (++i) ; tg_sig_par1->Draw ("AL*") ; tg_sig_par1->Fit ("pol2") ;
+  cout << "---> SIGNAL PARAM 2\n" ;
+  c_sig_par->cd (++i) ; tg_sig_par2->Draw ("AL*") ; tg_sig_par2->Fit ("pol2") ;
   c_sig_par->cd (++i) ; tg_sig_par3->Draw ("AL*") ;
   c_sig_par->cd (++i) ; tg_sig_par4->Draw ("AL*") ;
   c_sig_par->cd (++i) ; tg_sig_par5->Draw ("AL*") ;
   c_sig_par->cd (++i) ; tg_sig_par6->Draw ("AL*") ;
 
+  c_sig_par->Print ("params_signal.pdf", "pdf") ;
+  
   TCanvas * c_sAi_par = new TCanvas ("c_sAi_par", "c_sAi_par", 4000, 600) ;
   c_sAi_par->Divide (4,2) ;
   i = 0 ;
@@ -362,6 +383,8 @@ int graphs ()
   c_sAi_par->cd (++i) ; tg_sAi_par4->SetLineColor (kRed) ; tg_sAi_par4->Draw ("AL*") ;
   c_sAi_par->cd (++i) ; tg_sAi_par5->SetLineColor (kRed) ; tg_sAi_par5->Draw ("AL*") ;
   c_sAi_par->cd (++i) ; tg_sAi_par6->SetLineColor (kRed) ; tg_sAi_par6->Draw ("AL*") ;
+
+  c_sAi_par->Print ("params_phantom.pdf", "pdf") ;
 
   TCanvas * c_results = new TCanvas ("c_results", "c_results", 5000, 600) ;
   c_results->Divide (5,2) ;
@@ -528,14 +551,7 @@ int graphs ()
   f_IOS_1000->SetNpx (10000) ;
   f_IOS_1000->Draw ("same") ;
  
-
-
-
-//  TCanvas * test = new TCanvas () ;
-//  f_IOS_350->Draw () ;
-//  func_sig_350->Draw () ;
-//  func_350->Draw ("same") ;
-
+  c_results->Print ("params_masses.pdf", "pdf") ;
 
 }  
   
