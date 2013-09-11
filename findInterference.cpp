@@ -260,7 +260,7 @@ int main (int argc, char ** argv)
   if (mass == 350)
     {
       filename_mg = "/Users/govoni/data/lvjj_samples/interference/madgraph/madgraph_qqHWWlv4j_mh350.lhe" ;
-      XS_mg = 0.015413 ; // pb 350 GeV
+      XS_mg = 0.015413 * 2 ; // pb 350 GeV
     
       filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/phantom/total.350.lhe" ;
       XS_phbkgsig =  0.087460 * 2 ; // 8.7459661306E-002 // pb 350 GeV
@@ -277,7 +277,7 @@ int main (int argc, char ** argv)
   else if (mass == 650)
     {
       filename_mg = "/Users/govoni/data/lvjj_samples/interference/madgraph/madgraph_qqHWWlv4j_mh650.lhe" ;
-      XS_mg = 0.019246 ; // pb 650 GeV
+      XS_mg = 0.0019246 * 2 ; // pb 650 GeV
       
       filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/phantom/total.650.lhe" ;
       XS_phbkgsig = 0.076244 * 2 ; // 7.62444816705E-002 // pb 650 GeV
@@ -294,7 +294,7 @@ int main (int argc, char ** argv)
   else if (mass == 1000)
     {
       filename_mg = "/Users/govoni/data/lvjj_samples/interference/madgraph/madgraph_qqHWWlv4j_mh1000.lhe" ;
-      XS_mg = 0.0016269 ; // pb 1000 GeV
+      XS_mg = 0.00016269 * 2 ; // pb 1000 GeV
       
       filename_phbkgsig = "/Users/govoni/data/lvjj_samples/interference/phantom/total.1000.lhe" ;
       XS_phbkgsig =  0.074253 * 2 ; // 7.4253338203E-002 // pb 1000 GeV
