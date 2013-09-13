@@ -308,13 +308,13 @@ double crystalBallLowHigh (double* x, double* par)
   //[5] = alpha2
   //[6] = n2
   
-  double xx = x[0];
-  double mean = par[1];
-  double sigma = par[2];
-  double alpha = par[3];
-  double n = par[4];
+  double xx     = x[0];
+  double mean   = par[1];
+  double sigma  = fabs (par[2]);
+  double alpha  = par[3];
+  double n      = par[4];
   double alpha2 = par[5];
-  double n2 = par[6];
+  double n2     = par[6];
 
   if( (xx-mean)/sigma > fabs(alpha) )
   {
