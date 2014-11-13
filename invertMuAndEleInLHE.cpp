@@ -46,14 +46,14 @@ int main(int argc, char ** argv)
              {
                // mu to e
                if (reader.hepeup.IDUP.at (iPart) == 13) reader.hepeup.IDUP.at (iPart) = 11 ;
-               if (reader.hepeup.IDUP.at (iPart) == -13) reader.hepeup.IDUP.at (iPart) = -11 ;
-               if (reader.hepeup.IDUP.at (iPart) == 14) reader.hepeup.IDUP.at (iPart) = 12 ;
-               if (reader.hepeup.IDUP.at (iPart) == -14) reader.hepeup.IDUP.at (iPart) = -12 ;
+               else if (reader.hepeup.IDUP.at (iPart) == -13) reader.hepeup.IDUP.at (iPart) = -11 ;
+               else if (reader.hepeup.IDUP.at (iPart) == 14) reader.hepeup.IDUP.at (iPart) = 12 ;
+               else if (reader.hepeup.IDUP.at (iPart) == -14) reader.hepeup.IDUP.at (iPart) = -12 ;
                // e to mu
-               if (reader.hepeup.IDUP.at (iPart) == 11) reader.hepeup.IDUP.at (iPart) = 13 ;
-               if (reader.hepeup.IDUP.at (iPart) == -11) reader.hepeup.IDUP.at (iPart) = -13 ;
-               if (reader.hepeup.IDUP.at (iPart) == 12) reader.hepeup.IDUP.at (iPart) = 14 ;
-               if (reader.hepeup.IDUP.at (iPart) == -12) reader.hepeup.IDUP.at (iPart) = -14 ;
+               else if (reader.hepeup.IDUP.at (iPart) == 11) reader.hepeup.IDUP.at (iPart) = 13 ;
+               else if (reader.hepeup.IDUP.at (iPart) == -11) reader.hepeup.IDUP.at (iPart) = -13 ;
+               else if (reader.hepeup.IDUP.at (iPart) == 12) reader.hepeup.IDUP.at (iPart) = 14 ;
+               else if (reader.hepeup.IDUP.at (iPart) == -12) reader.hepeup.IDUP.at (iPart) = -14 ;
              } // outgoing particles
         } // loop over particles in the event
       writer.eventComments() << reader.eventComments;

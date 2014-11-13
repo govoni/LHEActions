@@ -6,7 +6,7 @@ import sys
 import os
 
 TESTING = 0
-QUEUE = '1nh'
+QUEUE = '8nm'
 
 
 # copio nella cartella di arrivo meta' delle gen folder
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     # ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
     runCommand ('cp ' + inputFolder + '/result ' + outputEEFolder, TESTING == 1, TESTING == 0)
     for i in range (len (folders) / 2) :
-        localInputFolder = inputFolder + '/gen' + str (i + 1)
+        localInputFolder = inputFolder + '/gen' + str (i + 1 + len (folders) / 2)
         localOutputFolder = outputEEFolder + '/gen' + str (i + 1)
         runCommand ('mkdir ' + localOutputFolder,
                      TESTING == 1, TESTING == 0)
