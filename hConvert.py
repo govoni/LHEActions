@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# example   ./hConvert.py gen_TP_OS_QCD_OS_uvuv_126 ./
 
 import commands
 import fileinput
@@ -6,7 +7,7 @@ import sys
 import os
 
 TESTING = 0
-QUEUE = '1nh'
+QUEUE = '8nm'
 
 
 # copio nella cartella di arrivo meta' delle gen folder
