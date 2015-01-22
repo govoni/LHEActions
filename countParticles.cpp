@@ -23,20 +23,29 @@ int main(int argc, char ** argv)
       return -1;
     }
 
+
+  int maxEvents = -1 ;
+  if (argc >= 3)
+    {
+      maxEvents = atoi (argv[2]) ;
+    }
+
   bool printList = false ;
-  if (argc == 3) printList = true ;
+  if (argc == 4) printList = true ;
 
 
   std::ifstream ifs (argv[1]) ;
   LHEF::Reader reader (ifs) ;
 
-  TH1F h_inp ("h_inp", "h_inp", 60, -30, 30) ;
-  TH1F h_out ("h_out", "h_out", 60, -30, 30) ;
-  TH1F h_int ("h_int", "h_int", 60, -30, 30) ;
+  TH1F h_inp ("h_inp", "h_inp", 61, -30.5, 30.5) ;
+  TH1F h_out ("h_out", "h_out", 61, -30.5, 30.5) ;
+  TH1F h_int ("h_int", "h_int", 61, -30.5, 30.5) ;
    
+  int counter = 0 ; 
   //PG loop over input events
   while (reader.readEvent ()) 
     {
+      if (maxEvents > 0 && counter > maxEvents) break ;
       if ( reader.outsideBlock.length ()) std::cout << reader.outsideBlock;
 
       // loop over particles in the event
@@ -53,7 +62,7 @@ int main(int argc, char ** argv)
              
         } // loop over particles in the event
       if (printList) cout << "\n" ;
-
+      ++counter ;
     } //PG loop over input events
 
   TCanvas c1 ("c1", "c1", 100, 100, 600, 600) ;
